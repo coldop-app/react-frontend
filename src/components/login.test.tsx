@@ -220,7 +220,7 @@ describe('Login', () => {
       expect(mockMutate).toHaveBeenCalledWith({
         mobileNumber: '1234567890',
         password: 'password123',
-        isMobile: false,
+        isMobile: true,
       });
     });
   });
