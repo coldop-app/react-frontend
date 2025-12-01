@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { User } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LogoutButton } from './logout-button';
@@ -29,7 +29,7 @@ interface UserMenuProps {
   coldStorage: ColdStorage | null;
 }
 
-function UserMenu({ admin, coldStorage }: UserMenuProps) {
+const UserMenuComponent = ({ admin, coldStorage }: UserMenuProps) => {
   return (
     <DropdownMenuContent align="end" className="w-56">
       <DropdownMenuLabel>
@@ -57,18 +57,63 @@ function UserMenu({ admin, coldStorage }: UserMenuProps) {
       </DropdownMenuItem>
     </DropdownMenuContent>
   );
-}
+};
 
-export default function Navbar() {
-  // TanStack Router pathname
+const UserMenu = memo(UserMenuComponent);
+
+// Static navbar parts that don't need to re-render on route changes
+const NavbarStaticContentComponent = ({
+  admin,
+  coldStorage,
+}: {
+  admin: Omit<StoreAdmin, 'password'>;
+  coldStorage: ColdStorage | null;
+}) => {
+  return (
+    <>
+      {/* Desktop */}
+      <div className="hidden md:flex items-center space-x-4">
+        <span className="text-sm text-muted-foreground">Welcome, {admin.name}</span>
+
+        <ThemeToggle />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <UserAvatar name={admin.name} imageUrl={coldStorage?.imageUrl ?? null} />
+              <span className="sr-only">User menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+
+          <UserMenu admin={admin} coldStorage={coldStorage} />
+        </DropdownMenu>
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden flex items-center space-x-2">
+        <ThemeToggle />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <UserAvatar name={admin.name} imageUrl={coldStorage?.imageUrl ?? null} />
+              <span className="sr-only">User menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+
+          <UserMenu admin={admin} coldStorage={coldStorage} />
+        </DropdownMenu>
+      </div>
+    </>
+  );
+};
+
+const NavbarStaticContent = memo(NavbarStaticContentComponent);
+
+// Dynamic page title that updates on route changes
+const PageTitleComponent = () => {
   const pathname = useLocation().pathname;
 
-  // Zustand store
-  const admin = useStore((state) => state.admin);
-  const coldStorage = useStore((state) => state.coldStorage);
-  const hasHydrated = useStore((state) => state._hasHydrated);
-
-  // Generate page title
   const formatted = useMemo(() => {
     if (pathname.match(/^\/store-admin\/people\/[^/]+$/)) {
       return 'Farmer Profile';
@@ -82,6 +127,21 @@ export default function Navbar() {
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ');
   }, [pathname]);
+
+  return (
+    <div className="ml-2 md:ml-6 md:pl-6 border-l border-border">
+      <h1 className="text-2xl font-bold text-foreground tracking-tight">{formatted}</h1>
+    </div>
+  );
+};
+
+const PageTitle = memo(PageTitleComponent);
+
+function Navbar() {
+  // Zustand store - only subscribe to what we need
+  const admin = useStore((state) => state.admin);
+  const coldStorage = useStore((state) => state.coldStorage);
+  const hasHydrated = useStore((state) => state._hasHydrated);
 
   // Skeleton while hydration is incomplete
   if (!hasHydrated || !admin) {
@@ -110,45 +170,15 @@ export default function Navbar() {
         {/* Left: Sidebar + page title */}
         <div className="flex items-center">
           <SidebarTrigger />
-          <div className="ml-2 md:ml-6 md:pl-6 border-l border-border">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">{formatted}</h1>
-          </div>
+          <PageTitle />
         </div>
 
-        {/* Desktop */}
-        <div className="hidden md:flex items-center space-x-4">
-          <span className="text-sm text-muted-foreground">Welcome, {admin.name}</span>
-
-          <ThemeToggle />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <UserAvatar name={admin.name} imageUrl={coldStorage?.imageUrl ?? null} />
-                <span className="sr-only">User menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-
-            <UserMenu admin={admin} coldStorage={coldStorage} />
-          </DropdownMenu>
-        </div>
-
-        {/* Mobile */}
-        <div className="md:hidden flex items-center space-x-2">
-          <ThemeToggle />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <UserAvatar name={admin.name} imageUrl={coldStorage?.imageUrl ?? null} />
-                <span className="sr-only">User menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-
-            <UserMenu admin={admin} coldStorage={coldStorage} />
-          </DropdownMenu>
-        </div>
+        <NavbarStaticContent admin={admin} coldStorage={coldStorage} />
       </div>
     </nav>
   );
 }
+
+const NavbarComponent = Navbar;
+
+export default memo(NavbarComponent);

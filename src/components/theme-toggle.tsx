@@ -1,19 +1,24 @@
+import { memo, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-export function ThemeToggle() {
+const ThemeToggleComponent = () => {
   const { setTheme, theme, resolvedTheme } = useTheme();
 
   // Use resolvedTheme which is available after hydration
   const currentTheme = resolvedTheme || theme;
 
+  const handleToggle = useCallback(() => {
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }, [setTheme, currentTheme]);
+
   return (
     <Button
       variant="outline"
       size="icon"
-      onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
+      onClick={handleToggle}
       className="h-9 w-9 relative"
       aria-label="Toggle theme"
     >
@@ -22,4 +27,6 @@ export function ThemeToggle() {
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
-}
+};
+
+export const ThemeToggle = memo(ThemeToggleComponent);

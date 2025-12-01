@@ -1,5 +1,6 @@
+import { memo, useMemo, useState, useCallback } from 'react';
 import { BookOpen, Users, BarChart3, Settings, ChevronRight } from 'lucide-react';
-import { useLocation } from '@tanstack/react-router';
+import { useLocation, Link } from '@tanstack/react-router';
 
 import {
   Sidebar,
@@ -49,19 +50,64 @@ const navigationItems = [
   },
 ];
 
+const SidebarHeaderContent = memo(() => {
+  return (
+    <SidebarHeader>
+      <div className="flex items-center gap-2 px-2 py-2">
+        <h1 className="text-lg font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
+          Coldop
+          <span className="text-[10px] ml-1 font-medium text-muted-foreground">BETA</span>
+        </h1>
+      </div>
+    </SidebarHeader>
+  );
+});
+SidebarHeaderContent.displayName = 'SidebarHeaderContent';
+
 const AppSidebar = () => {
   const { pathname } = useLocation();
 
+  // Derive daybook open state directly from pathname instead of using useEffect
+  const daybookOpen = useMemo(() => {
+    return (
+      pathname.startsWith('/store-admin/incoming') ||
+      pathname.startsWith('/store-admin/outgoing') ||
+      pathname === '/store-admin/daybook'
+    );
+  }, [pathname]);
+
+  // Use state for user-controlled toggling, but initialize from pathname
+  const [userToggledOpen, setUserToggledOpen] = useState<boolean | null>(null);
+
+  // Determine final open state: user toggle takes precedence, otherwise use pathname-based state
+  const isOpen = userToggledOpen !== null ? userToggledOpen : daybookOpen;
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    setUserToggledOpen(open);
+  }, []);
+
+  const navigationItemsWithState = useMemo(() => {
+    return navigationItems.map((item) => {
+      if (item.children) {
+        const isActive =
+          pathname === item.href || item.children.some((c) => pathname.startsWith(c.href));
+
+        return { ...item, isActive, isOpen, setOpen: handleOpenChange };
+      }
+
+      const isActive =
+        pathname === item.href ||
+        (item.activePaths
+          ? item.activePaths.some((path) => pathname.startsWith(path))
+          : pathname.startsWith(item.href));
+
+      return { ...item, isActive };
+    });
+  }, [pathname, isOpen, handleOpenChange]);
+
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <h1 className="text-lg font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
-            Coldop
-            <span className="text-[10px] ml-1 font-medium text-muted-foreground">BETA</span>
-          </h1>
-        </div>
-      </SidebarHeader>
+      <SidebarHeaderContent />
 
       <SidebarContent>
         <SidebarGroup>
@@ -69,25 +115,20 @@ const AppSidebar = () => {
 
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => {
+              {navigationItemsWithState.map((item) => {
                 const Icon = item.icon;
 
                 if (item.children) {
-                  const isActive =
-                    pathname === item.href ||
-                    item.children.some((c) => pathname.startsWith(c.href));
-
-                  const defaultOpen =
-                    pathname.startsWith('/store-admin/incoming') ||
-                    pathname.startsWith('/store-admin/outgoing') ||
-                    pathname === '/store-admin/daybook';
-
                   return (
                     <SidebarMenuItem key={item.name}>
-                      <Collapsible defaultOpen={defaultOpen} className="group/collapsible">
+                      <Collapsible
+                        open={item.isOpen}
+                        onOpenChange={item.setOpen}
+                        className="group/collapsible"
+                      >
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
-                            isActive={isActive}
+                            isActive={item.isActive}
                             variant="coldop-variant"
                             tooltip={item.name}
                             className="flex justify-between w-full"
@@ -112,7 +153,7 @@ const AppSidebar = () => {
                                 size="sm"
                                 className="pl-6"
                               >
-                                <a href={child.href}>{child.name}</a>
+                                <Link to={child.href}>{child.name}</Link>
                               </SidebarMenuButton>
                             );
                           })}
@@ -122,24 +163,18 @@ const AppSidebar = () => {
                   );
                 }
 
-                const isActive =
-                  pathname === item.href ||
-                  (item.activePaths
-                    ? item.activePaths.some((path) => pathname.startsWith(path))
-                    : pathname.startsWith(item.href));
-
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton
                       asChild
-                      isActive={isActive}
+                      isActive={item.isActive}
                       variant="coldop-variant"
                       tooltip={item.name}
                     >
-                      <a href={item.href}>
+                      <Link to={item.href}>
                         <Icon className="h-4 w-4" />
                         <span>{item.name}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -152,4 +187,4 @@ const AppSidebar = () => {
   );
 };
 
-export default AppSidebar;
+export default memo(AppSidebar);

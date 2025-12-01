@@ -1,5 +1,4 @@
-'use client';
-
+import { memo, useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserAvatarProps {
@@ -7,15 +6,16 @@ interface UserAvatarProps {
   imageUrl?: string | null;
 }
 
-// React Compiler handles memoization automatically
-export function UserAvatar({ name, imageUrl }: UserAvatarProps) {
-  // Get first initial from name
-  const initial = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 1); // Only first letter
+const UserAvatarComponent = ({ name, imageUrl }: UserAvatarProps) => {
+  // Get first initial from name - memoized
+  const initial = useMemo(() => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 1); // Only first letter
+  }, [name]);
 
   return (
     <Avatar className="h-9 w-9">
@@ -26,4 +26,6 @@ export function UserAvatar({ name, imageUrl }: UserAvatarProps) {
       )}
     </Avatar>
   );
-}
+};
+
+export const UserAvatar = memo(UserAvatarComponent);
