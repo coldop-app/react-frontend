@@ -12,17 +12,14 @@ interface StoreState {
   isLoading: boolean;
   _hasHydrated: boolean;
 
-  // Receipt voucher table preferences
   receiptVisibleColumns: string[];
   setReceiptColumns: (cols: string[]) => void;
   toggleReceiptColumn: (col: string) => void;
   resetReceiptColumns: () => void;
 
-  // Non-persisted editing state
   orderToEdit: DaybookOrder | null;
   setOrderToEdit: (order: DaybookOrder | null) => void;
 
-  // Auth + admin data
   setAdminData: (admin: Omit<StoreAdmin, 'password'>, coldStorage: ColdStorage) => void;
   clearAdminData: () => void;
 
@@ -32,6 +29,44 @@ interface StoreState {
 
 type PersistedState = Pick<StoreState, 'admin' | 'coldStorage' | 'receiptVisibleColumns'>;
 
+// ⏳ 1 week expiry in milliseconds
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+// ⭐ Custom storage wrapper
+const expiringStorage = {
+  getItem: (name: string) => {
+    const raw = localStorage.getItem(name);
+    if (!raw) return null;
+
+    try {
+      const parsed = JSON.parse(raw);
+      const { timestamp, value } = parsed;
+
+      // If expired → delete + return null
+      if (Date.now() - timestamp > ONE_WEEK) {
+        localStorage.removeItem(name);
+        return null;
+      }
+
+      return value;
+    } catch {
+      return null;
+    }
+  },
+
+  setItem: (name: string, value: unknown) => {
+    const wrapped = JSON.stringify({
+      timestamp: Date.now(),
+      value,
+    });
+    localStorage.setItem(name, wrapped);
+  },
+
+  removeItem: (name: string) => {
+    localStorage.removeItem(name);
+  },
+};
+
 export const useStore = create(
   persist<StoreState, [], [], PersistedState>(
     (set, get) => ({
@@ -40,9 +75,6 @@ export const useStore = create(
       isLoading: false,
       _hasHydrated: false,
 
-      /* -------------------------------
-            Table Column Preference
-      -------------------------------- */
       receiptVisibleColumns: ['variety', 'size', 'quantity', 'weight', 'chamber', 'floor', 'row'],
 
       setReceiptColumns: (cols) => set({ receiptVisibleColumns: cols }),
@@ -69,15 +101,9 @@ export const useStore = create(
           ],
         }),
 
-      /* -------------------------------
-            Order being edited
-      -------------------------------- */
       orderToEdit: null,
       setOrderToEdit: (order) => set({ orderToEdit: order }),
 
-      /* -------------------------------
-            Auth + Admin Data
-      -------------------------------- */
       setAdminData: (admin, coldStorage) => {
         set({
           admin,
@@ -95,8 +121,10 @@ export const useStore = create(
       setLoading: (loading) => set({ isLoading: loading }),
       setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
+
     {
       name: 'store-storage',
+      storage: expiringStorage, // ⭐ apply expiry logic here
 
       partialize: (state): PersistedState => ({
         admin: state.admin,
@@ -106,7 +134,7 @@ export const useStore = create(
 
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        // No token expiry logic needed anymore
+
         state.setHasHydrated(true);
       },
     }

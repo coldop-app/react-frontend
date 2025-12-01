@@ -3,12 +3,13 @@ import type { StoreAdminLoginInput, StoreAdminLoginApiResponse } from '@/types/s
 import storeAdminAxiosClient from '@/lib/axios';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useStore } from '@/stores/store';
 
 export const useStoreAdminLogin = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const search = useSearch({ from: '/auth/login' });
   const { setAdminData, setLoading } = useStore();
 
   return useMutation<
@@ -45,10 +46,18 @@ export const useStoreAdminLogin = () => {
 
       queryClient.invalidateQueries({ queryKey: ['store-admin', 'profile'] });
 
-      // ✅ TanStack Router navigation
-      navigate({
-        to: '/store-admin/daybook',
-      });
+      // ✅ TanStack Router navigation - redirect to original destination or default
+      const redirectTo = search?.redirect || '/store-admin/daybook';
+
+      // If redirect is a full URL, use window.location, otherwise use router navigation
+      if (redirectTo.startsWith('http')) {
+        window.location.href = redirectTo;
+      } else {
+        navigate({
+          to: redirectTo,
+          replace: true,
+        });
+      }
     },
 
     onError: (error) => {

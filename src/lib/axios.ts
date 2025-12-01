@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_URL } from './const';
 
 const storeAdminAxiosClient = axios.create({
-  baseURL: `${API_URL}/api/v1/base/store-admin`,
+  baseURL: `${API_URL}/api/v1/base`,
   withCredentials: true, // 🔥 IMPORTANT: allows cookies!
   timeout: 15000,
 });

@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { baseApi } from '@/lib/axios';
-import { ApiResponse } from '@/types/apiResponse';
+import storeAdminAxiosClient from '@/lib/axios';
+import type { ApiResponse } from '@/types/apiResponse';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
-import getQueryClient from '@/lib/get-query-client';
-
-const queryClient = getQueryClient();
+import { queryClient } from '@/lib/queryClient';
 
 export const useGetPreferencesById = (id: string, enabled = true) => {
   const query = useQuery<
@@ -16,7 +14,7 @@ export const useGetPreferencesById = (id: string, enabled = true) => {
     queryKey: ['preferences', id],
     enabled: !!id && enabled, // only run if ID exists
     queryFn: async () => {
-      const { data } = await baseApi.get(`/preferences/${id}`);
+      const { data } = await storeAdminAxiosClient.get(`/preferences/${id}`);
       return data;
     },
   });
@@ -42,7 +40,7 @@ export const prefetchPreferencesById = async (id: string) => {
   await queryClient.prefetchQuery({
     queryKey: ['preferences', id],
     queryFn: async (): Promise<ApiResponse> => {
-      const { data } = await baseApi.get(`/preferences/${id}`);
+      const { data } = await storeAdminAxiosClient.get(`/preferences/${id}`);
       return data;
     },
   });

@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.1] - 2025-12-01
+
+### Added
+
+- Complete daybook page with search, filtering, sorting, and pagination functionality
+- Authentication guard route (`_authenticated.tsx`) for protecting authenticated routes
+- App sidebar component with navigation and user information
+- Navbar component for top-level navigation
+- Theme toggle component for dark/light mode switching
+- User avatar component with dropdown menu
+- Logout button component with confirmation dialog
+- Receipt voucher card component for displaying incoming orders
+- Delivery voucher card component for displaying outgoing orders
+- Edit incoming order form dialog with comprehensive order editing capabilities
+- Daybook toolbar component with search bar and filter dropdowns
+- Daybook action buttons component for order management
+- Service hooks: `useDaybookOrders`, `useGetAllFarmers`, `useGetOrdersOfFarmer`, `useRegisterFarmer`, `useStoreAdminLogout`
+- Type definitions for incoming and outgoing orders
+- Schema for store admin farmer registration
+- Additional shadcn/ui components: AlertDialog, Avatar, Collapsible, DataTable, Dialog, DropdownMenu, Pagination, Separator, Sheet, Sidebar, Skeleton, Table, Textarea, Tooltip
+- Mobile responsive hook (`use-mobile.ts`) for detecting mobile devices
+
+### Changed
+
+- Updated authentication routes structure with protected route wrapper
+- Enhanced store structure with receipt column visibility management
+- Updated query client configuration for better error handling
+- Improved axios configuration with better interceptor setup
+- Updated helper functions for authentication checks
+
+### Removed
+
+- Removed `App.test.tsx` test file
+- Removed old daybook route structure in favor of new authenticated route organization
+
 ## [0.3.0-beta.0] - 2025-01-27
 
 ### Added
