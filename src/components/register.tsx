@@ -25,7 +25,6 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<StoreAdminRegisterForm>({
-    // @ts-expect-error - Zod v4 compatibility issue with @hookform/resolvers
     resolver: zodResolver(storeAdminRegisterSchema),
     defaultValues: {
       name: '',

@@ -14,6 +14,10 @@ declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }
+
+  interface HistoryState {
+    farmer?: import('./services/base/store-admin/functions/useGetAllFarmers').StoreAdminFarmer;
+  }
 }
 
 createRoot(document.getElementById('root')!).render(

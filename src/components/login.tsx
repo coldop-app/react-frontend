@@ -26,7 +26,6 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<StoreAdminLoginForm>({
-    // @ts-expect-error - Zod v4 compatibility issue with @hookform/resolvers
     resolver: zodResolver(storeAdminLoginSchema),
     defaultValues: {
       mobileNumber: '',

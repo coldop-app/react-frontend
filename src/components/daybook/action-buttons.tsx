@@ -26,7 +26,6 @@ export default function ActionButtons({ preferencesId }: ActionButtonsProps) {
       <Button
         variant="default"
         onClick={() => {
-          // @ts-expect-error - Route will be created later
           navigate({ to: '/store-admin/incoming' });
         }}
         className="flex items-center gap-1"
@@ -38,7 +37,6 @@ export default function ActionButtons({ preferencesId }: ActionButtonsProps) {
       <Button
         variant="outline"
         onClick={() => {
-          // @ts-expect-error - Route will be created later
           navigate({ to: '/store-admin/outgoing' });
         }}
         className="flex items-center gap-1"

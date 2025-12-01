@@ -15,7 +15,7 @@ export const useStoreAdminLogout = () => {
   const navigate = useNavigate();
   const { clearAdminData, setLoading } = useStore();
 
-  return useMutation<LogoutResponse, AxiosError, void>({
+  return useMutation<LogoutResponse, AxiosError<{ message?: string }>, void>({
     mutationKey: ['store-admin', 'logout'],
 
     mutationFn: async () => {
