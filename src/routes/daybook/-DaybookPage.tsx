@@ -30,6 +30,11 @@ export function DaybookPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div>
+        <h1 className="font-lusitana">Lusitana font</h1>
+        <p className="font-montserrat">Montserrat font</p>
+        <code className="font-geist-mono">Geist Mono font</code>
+      </div>
       <h1 className="text-3xl font-bold mb-6">Daybook</h1>
 
       <div className="space-y-4">
