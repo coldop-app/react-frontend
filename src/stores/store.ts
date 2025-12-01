@@ -9,6 +9,7 @@ import type { DaybookOrder } from '../types/daybook';
 interface StoreState {
   admin: Omit<StoreAdmin, 'password'> | null;
   coldStorage: ColdStorage | null;
+  token: string | null;
   isLoading: boolean;
   _hasHydrated: boolean;
 
@@ -20,14 +21,18 @@ interface StoreState {
   orderToEdit: DaybookOrder | null;
   setOrderToEdit: (order: DaybookOrder | null) => void;
 
-  setAdminData: (admin: Omit<StoreAdmin, 'password'>, coldStorage: ColdStorage) => void;
+  setAdminData: (
+    admin: Omit<StoreAdmin, 'password'>,
+    coldStorage: ColdStorage,
+    token: string
+  ) => void;
   clearAdminData: () => void;
 
   setLoading: (loading: boolean) => void;
   setHasHydrated: (state: boolean) => void;
 }
 
-type PersistedState = Pick<StoreState, 'admin' | 'coldStorage' | 'receiptVisibleColumns'>;
+type PersistedState = Pick<StoreState, 'admin' | 'coldStorage' | 'token' | 'receiptVisibleColumns'>;
 
 // ⏳ 1 week expiry in milliseconds
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -72,6 +77,7 @@ export const useStore = create(
     (set, get) => ({
       admin: null,
       coldStorage: null,
+      token: null,
       isLoading: false,
       _hasHydrated: false,
 
@@ -104,10 +110,11 @@ export const useStore = create(
       orderToEdit: null,
       setOrderToEdit: (order) => set({ orderToEdit: order }),
 
-      setAdminData: (admin, coldStorage) => {
+      setAdminData: (admin, coldStorage, token) => {
         set({
           admin,
           coldStorage,
+          token,
           isLoading: false,
         });
       },
@@ -116,6 +123,7 @@ export const useStore = create(
         set({
           admin: null,
           coldStorage: null,
+          token: null,
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),
@@ -124,11 +132,12 @@ export const useStore = create(
 
     {
       name: 'store-storage',
-      storage: expiringStorage, // ⭐ apply expiry logic here
+      storage: expiringStorage, // ⭐ apply expiry logic here (7 days)
 
       partialize: (state): PersistedState => ({
         admin: state.admin,
         coldStorage: state.coldStorage,
+        token: state.token,
         receiptVisibleColumns: state.receiptVisibleColumns,
       }),
 

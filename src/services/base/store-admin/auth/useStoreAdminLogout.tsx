@@ -21,13 +21,7 @@ export const useStoreAdminLogout = () => {
     mutationFn: async () => {
       setLoading(true);
 
-      const { data } = await storeAdminAxiosClient.post<LogoutResponse>(
-        '/store-admin/logout',
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      const { data } = await storeAdminAxiosClient.post<LogoutResponse>('/store-admin/logout', {});
 
       return data;
     },

@@ -22,9 +22,7 @@ export const useStoreAdminLogin = () => {
     mutationFn: async (payload) => {
       setLoading(true);
 
-      const { data } = await storeAdminAxiosClient.post('/store-admin/login', payload, {
-        withCredentials: true, // send & receive cookies
-      });
+      const { data } = await storeAdminAxiosClient.post('/store-admin/login', payload);
 
       return data;
     },
@@ -37,10 +35,10 @@ export const useStoreAdminLogin = () => {
         return;
       }
 
-      const { admin, coldStorage } = data.data;
+      const { admin, coldStorage, token } = data.data;
 
-      // store admin + coldStorage (no token)
-      setAdminData(admin, coldStorage);
+      // store admin + coldStorage + token
+      setAdminData(admin, coldStorage, token);
 
       toast.success(data.message || 'Logged in successfully!');
 

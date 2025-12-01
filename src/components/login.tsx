@@ -30,7 +30,7 @@ export function Login() {
     defaultValues: {
       mobileNumber: '',
       password: '',
-      isMobile: false,
+      isMobile: true,
     },
   });
 
