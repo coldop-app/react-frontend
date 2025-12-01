@@ -5,6 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 import prettierPlugin from 'eslint-plugin-prettier';
+import queryPlugin from '@tanstack/eslint-plugin-query';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
@@ -33,6 +34,7 @@ export default defineConfig([
     },
     plugins: {
       prettier: prettierPlugin,
+      '@tanstack/query': queryPlugin,
     },
     rules: {
       // Prettier integration
@@ -60,6 +62,10 @@ export default defineConfig([
       'react/react-in-jsx-scope': 'off', // Not needed in React 17+
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+
+      // TanStack Query rules
+      '@tanstack/query/exhaustive-deps': 'error',
+      '@tanstack/query/stable-query-client': 'error',
     },
   },
   {
