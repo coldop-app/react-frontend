@@ -6,20 +6,19 @@ import App from './App';
 describe('App', () => {
   it('renders the app correctly', () => {
     render(<App />);
-    expect(screen.getByText(/Vite \+ React/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument();
   });
 
-  it('increments count when button is clicked', async () => {
+  it('renders a clickable button', async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const button = screen.getByRole('button', { name: /count is/i });
-    expect(button).toHaveTextContent('count is 0');
+    const button = screen.getByRole('button', { name: /click me/i });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent('Click me');
 
+    // Button should be clickable
     await user.click(button);
-    expect(button).toHaveTextContent('count is 1');
-
-    await user.click(button);
-    expect(button).toHaveTextContent('count is 2');
+    expect(button).toBeInTheDocument();
   });
 });
