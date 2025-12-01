@@ -9,7 +9,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import type { DaybookOrder } from '@/types/daybook';
 import type { ColdStorage } from '@/types/coldStorage';
-// import EditIncomingOrderDialog from '@/components/forms/edit-incoming-order';
+import EditIncomingOrderDialog from '@/components/forms/edit-incoming-order';
 
 interface TableRow {
   variety: string;
@@ -373,11 +373,11 @@ function ReceiptVoucherCard({
       )}
 
       {/* Edit Dialog */}
-      {/* <EditIncomingOrderDialog
+      <EditIncomingOrderDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         order={data}
-      /> */}
+      />
     </Card>
   );
 }

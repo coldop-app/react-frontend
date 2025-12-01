@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Dialog,
@@ -23,7 +21,7 @@ import { useStore } from '@/stores/store';
 import type { DaybookOrder } from '@/types/daybook';
 import { cn } from '@/lib/utils';
 import { Plus, X } from 'lucide-react';
-import OrderNumber from '@/components/forms/order-number';
+import { OrderNumber } from '@/components/forms/order-number';
 import { toast } from 'sonner';
 import { useEditIncomingOrder } from '@/services/base/incoming-orders/useEditIncomingOrder';
 import type { EditIncomingOrderInput, IncomingOrderBagSize } from '@/types/incomingOrder';

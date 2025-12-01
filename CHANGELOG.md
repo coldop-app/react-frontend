@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.3] - 2025-12-01
+
+### Added
+
+- Complete incoming order form with comprehensive order creation capabilities
+- Farmer search component with searchable farmer selection
+- Commodity selector component for selecting order commodity
+- Date picker component with calendar integration
+- Variety entry component supporting multiple varieties per order
+- Quantity input component with support for multiple bag sizes
+- Location input component for chamber, floor, and row tracking
+- Order number display component showing gate pass numbers
+- Variety selector component for selecting available varieties
+- Add farmer modal component for registering new farmers
+- Incoming order summary sheet with order review and remarks
+- Search selector component with searchable dropdown functionality
+- Enter navigation hook for keyboard navigation support
+- Incoming order form schema with Zod validation
+- Support for null voucher creation with disabled form fields
+- Custom marka field support based on preferences
+- Multiple variety management with add/remove functionality
+- New store admin routes: incoming, outgoing, analytics, and people pages
+- Additional shadcn/ui components: Calendar, Command, Popover, Tabs
+
+### Changed
+
+- Updated form components index to export all form components
+- Enhanced incoming order services with improved error handling
+- Improved gate pass number retrieval logic
+
+### Fixed
+
+- Fixed type import errors by using type-only imports for TypeScript types
+- Fixed missing FarmerSearch export in forms index
+- Fixed implicit any type in FarmerSearch onSelect callback
+- Fixed unnecessary React Hook dependency in orderDate useMemo
+- Fixed linting errors in incoming order form component
+
 ## [0.3.0-beta.2] - 2025-12-01
 
 ### Changed

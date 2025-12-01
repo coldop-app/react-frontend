@@ -1,11 +1,11 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStore } from '@/store';
-import { baseApi } from '@/lib/axios';
+import { useStore } from '@/stores/store';
+import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 
 import type {
   CreateIncomingOrderInput,
@@ -15,7 +15,7 @@ import type {
 export const useCreateIncomingOrder = () => {
   const queryClient = useQueryClient();
   const { setLoading } = useStore();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return useMutation<
     CreateIncomingOrderApiResponse,
@@ -30,8 +30,8 @@ export const useCreateIncomingOrder = () => {
     mutationFn: async (payload) => {
       setLoading(true);
 
-      const { data } = await baseApi.post<CreateIncomingOrderApiResponse>(
-        '/incoming-orders',
+      const { data } = await storeAdminAxiosClient.post<CreateIncomingOrderApiResponse>(
+        '/store-admin/incoming-orders',
         payload
       );
 
@@ -51,9 +51,10 @@ export const useCreateIncomingOrder = () => {
 
       toast.success(data.message || 'Incoming order created!');
 
-      router.push('/store-admin/daybook');
+      // Navigate using TanStack Router
+      navigate({ to: '/store-admin/daybook' });
 
-      // Invalidate relevant queries (if you have lists, dashboards, etc.)
+      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['incoming-orders'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
     },

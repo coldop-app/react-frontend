@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { baseApi } from '@/lib/axios';
+import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 
@@ -38,9 +38,12 @@ export const useGetGatePassNumber = (
   >({
     queryKey: ['gate-pass-number', commodity, type],
     queryFn: async () => {
-      const { data } = await baseApi.get<GatePassNumberResponse>(`/store-admin/gate-pass-number`, {
-        params: { commodity, type }, // ⬅️ now includes type
-      });
+      const { data } = await storeAdminAxiosClient.get<GatePassNumberResponse>(
+        `/store-admin/gate-pass-number`,
+        {
+          params: { commodity, type }, // ⬅️ now includes type
+        }
+      );
       return data;
     },
     enabled: !!commodity && !!type, // Run only when both are provided
