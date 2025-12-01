@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -36,7 +36,7 @@ interface SummarySheetProps {
   isSubmitting: boolean;
 }
 
-export function IncomingOrderSummarySheet({
+function IncomingOrderSummarySheetComponent({
   open,
   onOpenChange,
   selectedFarmer,
@@ -63,6 +63,38 @@ export function IncomingOrderSummarySheet({
       return () => clearTimeout(timer);
     }
   }, [open]);
+
+  // Memoize number formatting function
+  const formatNumber = useCallback((value: number) => {
+    return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }, []);
+
+  // Memoize formatted grand total
+  const formattedGrandTotal = useMemo(() => {
+    return formatNumber(grandTotal);
+  }, [grandTotal, formatNumber]);
+
+  // Memoize variety totals with formatted numbers
+  const formattedVarietyTotals = useMemo(() => {
+    return varietyTotals.map((vt) => ({
+      ...vt,
+      formattedTotal: formatNumber(vt.total),
+      // Pre-filter and format quantities for each variety
+      formattedQuantities: sizes
+        .map((size) => {
+          const qty = vt.quantities[size];
+          if (!qty || qty.trim() === '') return null;
+          return {
+            size,
+            value: parseFloat(qty),
+            formatted: formatNumber(parseFloat(qty)),
+          };
+        })
+        .filter(
+          (item): item is { size: string; value: number; formatted: string } => item !== null
+        ),
+    }));
+  }, [varietyTotals, sizes, formatNumber]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -154,12 +186,12 @@ export function IncomingOrderSummarySheet({
           )}
 
           {/* Varieties and Quantities */}
-          {!isNullVoucher && varietyTotals.length > 0 && (
+          {!isNullVoucher && formattedVarietyTotals.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Varieties & Quantities</h3>
               <div className="space-y-4">
-                {varietyTotals.map((vt, idx) => (
-                  <div key={idx} className="p-4 rounded-lg border bg-card">
+                {formattedVarietyTotals.map((vt) => (
+                  <div key={vt.variety} className="p-4 rounded-lg border bg-card">
                     <div className="space-y-3">
                       {/* Header Section */}
                       <div className="flex items-center justify-between pb-2 border-b">
@@ -167,39 +199,31 @@ export function IncomingOrderSummarySheet({
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-muted-foreground">Total:</span>
                           <span className="text-base font-bold text-primary">
-                            {vt.total.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                            {vt.formattedTotal}
                           </span>
                         </div>
                       </div>
                       {/* Quantities Grid */}
                       <div className="grid grid-cols-2 gap-3 text-sm">
-                        {sizes.map((size) => {
-                          const qty = vt.quantities[size];
-                          if (!qty || qty.trim() === '') return null;
-                          return (
-                            <div key={size} className="flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground">{size}</span>
-                              <span className="text-sm font-semibold text-foreground/90">
-                                {parseFloat(qty).toLocaleString('en-US', {
-                                  maximumFractionDigits: 2,
-                                })}
-                              </span>
-                            </div>
-                          );
-                        })}
+                        {vt.formattedQuantities.map((qty) => (
+                          <div key={qty.size} className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">{qty.size}</span>
+                            <span className="text-sm font-semibold text-foreground/90">
+                              {qty.formatted}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
               {/* Grand Total */}
-              {varietyTotals.length > 0 && (
+              {formattedVarietyTotals.length > 0 && (
                 <div className="p-4 rounded-lg border bg-muted/50">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold text-foreground/90">Grand Total</p>
-                    <p className="text-lg font-bold text-primary">
-                      {grandTotal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </p>
+                    <p className="text-lg font-bold text-primary">{formattedGrandTotal}</p>
                   </div>
                 </div>
               )}
@@ -236,3 +260,6 @@ export function IncomingOrderSummarySheet({
     </Sheet>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export const IncomingOrderSummarySheet = React.memo(IncomingOrderSummarySheetComponent);

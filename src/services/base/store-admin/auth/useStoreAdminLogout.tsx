@@ -22,7 +22,7 @@ export const useStoreAdminLogout = () => {
       setLoading(true);
 
       const { data } = await storeAdminAxiosClient.post<LogoutResponse>(
-        'logout',
+        '/store-admin/logout',
         {},
         {
           withCredentials: true,

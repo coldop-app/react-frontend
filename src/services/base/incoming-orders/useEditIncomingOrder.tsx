@@ -1,18 +1,16 @@
-'use client';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStore } from '@/store';
-import { baseApi } from '@/lib/axios';
+import { useStore } from '@/stores/store';
+import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 
 import type { EditIncomingOrderInput, EditIncomingOrderApiResponse } from '@/types/incomingOrder';
 
 export const useEditIncomingOrder = () => {
   const queryClient = useQueryClient();
   const { setLoading } = useStore();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return useMutation<
     EditIncomingOrderApiResponse,
@@ -29,8 +27,8 @@ export const useEditIncomingOrder = () => {
 
       const { id, ...updateData } = payload;
 
-      const { data } = await baseApi.put<EditIncomingOrderApiResponse>(
-        `/incoming-orders/${id}`,
+      const { data } = await storeAdminAxiosClient.put<EditIncomingOrderApiResponse>(
+        `/store-admin/incoming-orders/${id}`,
         updateData
       );
 
@@ -50,7 +48,8 @@ export const useEditIncomingOrder = () => {
 
       toast.success(data.message || 'Incoming order updated!');
 
-      router.push('/store-admin/daybook');
+      // Navigate using TanStack Router
+      navigate({ to: '/store-admin/daybook' });
 
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['incoming-orders'] });

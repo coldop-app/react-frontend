@@ -29,7 +29,7 @@ export const useGetOrdersOfFarmer = ({
 
     queryFn: async () => {
       const { data } = await storeAdminAxiosClient.get<ApiResponse<DaybookOrder[]>>(
-        '/farmer/orders',
+        '/store-admin/farmer/orders',
         {
           params: { farmerStorageLinkId, type },
         }
@@ -70,7 +70,7 @@ export const prefetchFarmerOrders = async (
     queryKey: ['farmer-orders', farmerStorageLinkId, type],
     queryFn: async () => {
       const { data } = await storeAdminAxiosClient.get<ApiResponse<DaybookOrder[]>>(
-        '/farmer/orders',
+        '/store-admin/farmer/orders',
         {
           params: { farmerStorageLinkId, type },
         }

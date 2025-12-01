@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useMemo, useCallback, memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -90,6 +88,7 @@ function ReceiptVoucherCard({
   setReceiptColumns,
 }: ReceiptVoucherCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Memoize toggle handler
   const toggleExpanded = useCallback(() => {
@@ -277,9 +276,7 @@ function ReceiptVoucherCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                // Edit dialog functionality will be implemented later
-              }}
+              onClick={() => setIsEditDialogOpen(true)}
               aria-label="Edit voucher"
             >
               <Edit className="w-4 h-4 text-primary" />

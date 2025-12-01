@@ -22,7 +22,7 @@ export const useStoreAdminLogin = () => {
     mutationFn: async (payload) => {
       setLoading(true);
 
-      const { data } = await storeAdminAxiosClient.post('login', payload, {
+      const { data } = await storeAdminAxiosClient.post('/store-admin/login', payload, {
         withCredentials: true, // send & receive cookies
       });
 

@@ -1,11 +1,11 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStore } from '@/store';
-import { baseApi } from '@/lib/axios';
+import { useStore } from '@/stores/store';
+import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 
 import type {
   CreateOutgoingOrderInput,
@@ -15,7 +15,7 @@ import type {
 export const useCreateOutgoingOrder = () => {
   const queryClient = useQueryClient();
   const { setLoading } = useStore();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return useMutation<
     CreateOutgoingOrderApiResponse,
@@ -30,8 +30,8 @@ export const useCreateOutgoingOrder = () => {
     mutationFn: async (payload) => {
       setLoading(true);
 
-      const { data } = await baseApi.post<CreateOutgoingOrderApiResponse>(
-        '/outgoing-orders',
+      const { data } = await storeAdminAxiosClient.post<CreateOutgoingOrderApiResponse>(
+        '/store-admin/outgoing-orders',
         payload
       );
 
@@ -42,28 +42,28 @@ export const useCreateOutgoingOrder = () => {
     // Success Handler
     // -------------------------
     onSuccess: (data) => {
-      setLoading(false);
-
       if (!data.success) {
-        toast.error(data.data?.order ? 'Unexpected error' : data.message);
+        toast.error(data.message || 'Unexpected error');
         return;
       }
 
       toast.success(data.message || 'Outgoing order created!');
 
-      router.push('/store-admin/daybook');
+      // TanStack Router navigation
+      navigate({
+        to: '/store-admin/daybook',
+      });
 
-      // Invalidate relevant queries (if you have lists, dashboards, etc.)
+      // Invalidate data
       queryClient.invalidateQueries({ queryKey: ['outgoing-orders'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['daybook'] });
     },
 
     // -------------------------
     // Error Handler
     // -------------------------
     onError: (error) => {
-      setLoading(false);
-
       const message =
         error.response?.data?.error?.message ||
         error.response?.data?.message ||
@@ -71,6 +71,13 @@ export const useCreateOutgoingOrder = () => {
         'Failed to create outgoing order';
 
       toast.error(message);
+    },
+
+    // -------------------------
+    // Always run (success or error)
+    // -------------------------
+    onSettled: () => {
+      setLoading(false);
     },
   });
 };
