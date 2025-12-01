@@ -6,7 +6,12 @@ import { Toaster } from '@/components/ui/sonner';
 export const Route = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div className="app-container">
+        {/* Outlet renders the matched route */}
+        <main>
+          <Outlet />
+        </main>
+      </div>
       <Toaster />
     </QueryClientProvider>
   ),
