@@ -1,5 +1,3 @@
-'use client';
-
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import storeAdminAxiosClient from '@/lib/axios';
 import type { AxiosError } from 'axios';
@@ -7,7 +5,22 @@ import { toast } from 'sonner';
 import { useStore } from '@/stores/store';
 import type { DaybookApiResponse } from '@/types/daybook';
 import { daybookKeys, type DaybookQueryParams } from './daybook-keys';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
+
+const STALE_TIME = 15_000; // 15 seconds
+const CACHE_TIME = 600_000; // 10 minutes
+const MAX_RETRY_DELAY = 30_000;
+
+/**
+ * Shared query function to avoid duplication
+ */
+const fetchDaybook = async (params: DaybookQueryParams | undefined, signal?: AbortSignal) => {
+  const { data } = await storeAdminAxiosClient.get<DaybookApiResponse>('/store-admin/daybook', {
+    params,
+    signal,
+  });
+  return data;
+};
 
 /**
  * Daybook Query Hook — Balanced Freshness Mode
@@ -17,80 +30,76 @@ export const useDaybook = (params?: DaybookQueryParams) => {
   const queryClient = useQueryClient();
   const hasShownError = useRef(false);
 
-  const query = useQuery<DaybookApiResponse, AxiosError<{ message?: string }>>({
-    queryKey: daybookKeys.list(params),
+  // Memoize query options to prevent unnecessary re-renders
+  const queryOptions = useMemo(
+    () => ({
+      queryKey: daybookKeys.list(params),
+      queryFn: ({ signal }: { signal?: AbortSignal }) => fetchDaybook(params, signal),
+      staleTime: STALE_TIME,
+      gcTime: CACHE_TIME,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      placeholderData: keepPreviousData,
+      retry: 2,
+      retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, MAX_RETRY_DELAY),
+      structuralSharing: true,
+    }),
+    [params]
+  );
 
-    queryFn: async ({ signal }) => {
-      const { data } = await storeAdminAxiosClient.get<DaybookApiResponse>('/store-admin/daybook', {
-        params,
-        signal,
-      });
-      return data;
-    },
-
-    // freshness strategy
-    staleTime: 15_000, // 15 seconds
-    gcTime: 1000 * 60 * 10, // cache for 10 minutes
-
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-
-    placeholderData: keepPreviousData,
-
-    retry: 2,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30_000),
-
-    structuralSharing: true,
-  });
+  const query = useQuery<DaybookApiResponse, AxiosError<{ message?: string }>>(queryOptions);
 
   /**
-   * Auto-prefetch next page
+   * Auto-prefetch next page (optimized with useMemo)
    */
+  const shouldPrefetch = useMemo(
+    () => query.data?.pagination?.hasNextPage && params?.page,
+    [query.data?.pagination?.hasNextPage, params?.page]
+  );
+
   useEffect(() => {
-    if (query.data?.pagination?.hasNextPage && params?.page) {
+    if (shouldPrefetch && params?.page) {
       const nextPage = { ...params, page: params.page + 1 };
 
-      queryClient.prefetchQuery({
-        queryKey: daybookKeys.list(nextPage),
-        queryFn: async ({ signal }) => {
-          const { data } = await storeAdminAxiosClient.get<DaybookApiResponse>('/daybook', {
-            params: nextPage,
-            signal,
-          });
-          return data;
-        },
-        staleTime: 15_000,
-      });
+      // Use setTimeout to defer prefetching (non-blocking)
+      const timerId = setTimeout(() => {
+        queryClient.prefetchQuery({
+          queryKey: daybookKeys.list(nextPage),
+          queryFn: ({ signal }) => fetchDaybook(nextPage, signal),
+          staleTime: STALE_TIME,
+        });
+      }, 100);
+
+      return () => clearTimeout(timerId);
     }
-  }, [query.data, params, queryClient]);
+  }, [shouldPrefetch, params, queryClient]);
 
   /**
-   * Global loading state management
+   * Global loading state management (optimized condition)
    */
   useEffect(() => {
     const shouldShow = query.isLoading && !query.isFetching;
     setLoading(shouldShow);
 
-    return () => {
-      setLoading(false);
-    };
+    return () => setLoading(false);
   }, [query.isLoading, query.isFetching, setLoading]);
 
   /**
-   * Error toast (once per error)
+   * Error toast (once per error) - optimized with early return
    */
   useEffect(() => {
-    if (query.isError && query.error && !hasShownError.current) {
+    if (!query.isError) {
+      hasShownError.current = false;
+      return;
+    }
+
+    if (query.error && !hasShownError.current) {
       const msg =
         query.error.response?.data?.message || query.error.message || 'Failed to fetch daybook';
 
       toast.error(msg);
       hasShownError.current = true;
-    }
-
-    if (!query.isError) {
-      hasShownError.current = false;
     }
   }, [query.isError, query.error]);
 
@@ -98,7 +107,7 @@ export const useDaybook = (params?: DaybookQueryParams) => {
 };
 
 /**
- * Prefetch helper — same API as your farmer hook
+ * Prefetch helper — memoized for performance
  */
 export const usePrefetchDaybook = () => {
   const queryClient = useQueryClient();
@@ -107,17 +116,8 @@ export const usePrefetchDaybook = () => {
     (params?: DaybookQueryParams) => {
       queryClient.prefetchQuery({
         queryKey: daybookKeys.list(params),
-        queryFn: async ({ signal }) => {
-          const { data } = await storeAdminAxiosClient.get<DaybookApiResponse>(
-            '/store-admin/daybook',
-            {
-              params,
-              signal,
-            }
-          );
-          return data;
-        },
-        staleTime: 15_000,
+        queryFn: ({ signal }) => fetchDaybook(params, signal),
+        staleTime: STALE_TIME,
       });
     },
     [queryClient]

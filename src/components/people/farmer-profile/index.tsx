@@ -1,14 +1,17 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouterState, useParams } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { User, Phone, MapPin, CheckCircle2, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { User, Phone, MapPin, CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetOrdersOfFarmer } from '@/services/base/store-admin/functions/useGetOrdersOfFarmer';
 import type { StoreAdminFarmer } from '@/services/base/store-admin/functions/useGetAllFarmers';
 import { useStore } from '@/stores/store';
 import { groupOrdersByCommodity, getCommoditiesFromOrders, calculateStockSummary } from './helpers';
 import { StockSummaryTable } from './stock-summary-table';
+import ReceiptVoucherCard from '@/components/receipt-voucher-card';
+import DeliveryVoucherCard from '@/components/delivery-voucher-card';
 
 export default function FarmerProfilePage() {
   // Get the route param
@@ -20,8 +23,11 @@ export default function FarmerProfilePage() {
   const routerState = useRouterState();
   const farmer = routerState.location.state?.farmer as StoreAdminFarmer | undefined;
 
-  // Get coldStorage from store
-  const { coldStorage } = useStore();
+  // Get coldStorage and receipt columns from store
+  const { coldStorage, receiptVisibleColumns, setReceiptColumns } = useStore();
+
+  // State for showing vouchers
+  const [showVouchers, setShowVouchers] = useState(false);
 
   // Fetch orders unconditionally but disable if ID is missing
   const { data: ordersData, isLoading } = useGetOrdersOfFarmer({
@@ -30,8 +36,15 @@ export default function FarmerProfilePage() {
     enabled: !!farmerStorageLinkId,
   });
 
-  // Process orders data
-  const orders = useMemo(() => ordersData?.data || [], [ordersData?.data]);
+  // Process orders data and sort by date (latest first)
+  const orders = useMemo(() => {
+    const ordersList = ordersData?.data || [];
+    return [...ordersList].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA; // Latest first
+    });
+  }, [ordersData?.data]);
 
   // Group orders by commodity
   const ordersByCommodity = useMemo(() => groupOrdersByCommodity(orders), [orders]);
@@ -151,6 +164,53 @@ export default function FarmerProfilePage() {
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">No orders found for this farmer.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show Vouchers Button and Vouchers List */}
+      {orders.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Order Vouchers</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowVouchers(!showVouchers)}
+                className="gap-2"
+              >
+                {showVouchers ? (
+                  <>
+                    Hide Vouchers
+                    <ChevronUp className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    Show Vouchers
+                    <ChevronDown className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {showVouchers && (
+              <div className="mt-4 space-y-4">
+                {orders.map((voucher) =>
+                  voucher.type === 'incoming' ? (
+                    <ReceiptVoucherCard
+                      key={voucher.id}
+                      data={voucher}
+                      coldStorage={coldStorage}
+                      receiptVisibleColumns={receiptVisibleColumns}
+                      setReceiptColumns={setReceiptColumns}
+                    />
+                  ) : (
+                    <DeliveryVoucherCard key={voucher.id} data={voucher} />
+                  )
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

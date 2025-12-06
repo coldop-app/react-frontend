@@ -86,34 +86,63 @@ export function calculateStockSummary(
   const initialMap = new Map<string, Map<string, number>>(); // variety -> bagSize -> initial qty
   const outgoingMap = new Map<string, Map<string, number>>(); // variety -> bagSize -> outgoing qty
 
+  // Process only incoming orders to calculate initial and current quantities
   orders.forEach((order) => {
-    order.varieties.forEach((variety) => {
-      // Initialize maps if needed
-      if (!currentMap.has(variety.name)) {
-        currentMap.set(variety.name, new Map<string, number>());
-        initialMap.set(variety.name, new Map<string, number>());
-        outgoingMap.set(variety.name, new Map<string, number>());
-      }
+    if (order.type === 'incoming') {
+      order.varieties.forEach((variety) => {
+        // Initialize maps if needed
+        if (!currentMap.has(variety.name)) {
+          currentMap.set(variety.name, new Map<string, number>());
+          initialMap.set(variety.name, new Map<string, number>());
+        }
 
-      const currentVarietyMap = currentMap.get(variety.name)!;
-      const initialVarietyMap = initialMap.get(variety.name)!;
-      const outgoingVarietyMap = outgoingMap.get(variety.name)!;
+        const currentVarietyMap = currentMap.get(variety.name)!;
+        const initialVarietyMap = initialMap.get(variety.name)!;
 
-      variety.bagSizes.forEach((bagSize) => {
-        if (order.type === 'incoming') {
+        variety.bagSizes.forEach((bagSize) => {
           // For incoming: add to current and initial
           const currentQty = currentVarietyMap.get(bagSize.name) || 0;
           const initialQty = initialVarietyMap.get(bagSize.name) || 0;
           currentVarietyMap.set(bagSize.name, currentQty + bagSize.quantityCurr);
           initialVarietyMap.set(bagSize.name, initialQty + bagSize.quantityInit);
-        } else {
-          // For outgoing: subtract from current, add to outgoing
-          const currentQty = currentVarietyMap.get(bagSize.name) || 0;
-          const outgoingQty = outgoingVarietyMap.get(bagSize.name) || 0;
-          currentVarietyMap.set(bagSize.name, currentQty - bagSize.quantityCurr);
-          outgoingVarietyMap.set(bagSize.name, outgoingQty + bagSize.quantityCurr);
-        }
+        });
       });
+    }
+  });
+
+  // Calculate outgoing as Initial - Current for each variety and bag size
+  // First, ensure all varieties in initialMap have corresponding entries in outgoingMap
+  initialMap.forEach((initialVarietyMap, variety) => {
+    if (!outgoingMap.has(variety)) {
+      outgoingMap.set(variety, new Map<string, number>());
+    }
+    const outgoingVarietyMap = outgoingMap.get(variety)!;
+    const currentVarietyMap = currentMap.get(variety) || new Map<string, number>();
+
+    initialVarietyMap.forEach((initialQty, bagSize) => {
+      const currentQty = currentVarietyMap.get(bagSize) || 0;
+      const outgoingQty = initialQty - currentQty;
+      outgoingVarietyMap.set(bagSize, outgoingQty);
+    });
+  });
+
+  // Also handle varieties that might be in currentMap but not in initialMap (shouldn't happen, but for safety)
+  currentMap.forEach((currentVarietyMap, variety) => {
+    if (!initialMap.has(variety)) {
+      initialMap.set(variety, new Map<string, number>());
+    }
+    if (!outgoingMap.has(variety)) {
+      outgoingMap.set(variety, new Map<string, number>());
+    }
+    const initialVarietyMap = initialMap.get(variety)!;
+    const outgoingVarietyMap = outgoingMap.get(variety)!;
+
+    // For bag sizes in current but not in initial, set initial to current and outgoing to 0
+    currentVarietyMap.forEach((currentQty, bagSize) => {
+      if (!initialVarietyMap.has(bagSize)) {
+        initialVarietyMap.set(bagSize, currentQty);
+        outgoingVarietyMap.set(bagSize, 0);
+      }
     });
   });
 

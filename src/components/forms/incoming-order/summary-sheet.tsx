@@ -10,11 +10,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface VarietyTotal {
   variety: string;
   total: number;
   quantities: Record<string, string>;
+  locations: Record<string, { chamber: string; floor: string; row: string }>;
 }
 
 interface SummarySheetProps {
@@ -74,6 +83,19 @@ function IncomingOrderSummarySheetComponent({
     return formatNumber(grandTotal);
   }, [grandTotal, formatNumber]);
 
+  // Helper function to format location
+  const formatLocation = useCallback(
+    (location: { chamber: string; floor: string; row: string } | undefined): string => {
+      if (!location) return '-';
+      const parts: string[] = [];
+      if (location.chamber?.trim()) parts.push(location.chamber.trim());
+      if (location.floor?.trim()) parts.push(location.floor.trim());
+      if (location.row?.trim()) parts.push(location.row.trim());
+      return parts.length > 0 ? parts.join('/') : '-';
+    },
+    []
+  );
+
   // Memoize variety totals with formatted numbers
   const formattedVarietyTotals = useMemo(() => {
     return varietyTotals.map((vt) => ({
@@ -84,17 +106,26 @@ function IncomingOrderSummarySheetComponent({
         .map((size) => {
           const qty = vt.quantities[size];
           if (!qty || qty.trim() === '') return null;
+          const location = vt.locations?.[size];
           return {
             size,
             value: parseFloat(qty),
             formatted: formatNumber(parseFloat(qty)),
+            location: formatLocation(location),
           };
         })
         .filter(
-          (item): item is { size: string; value: number; formatted: string } => item !== null
+          (
+            item
+          ): item is {
+            size: string;
+            value: number;
+            formatted: string;
+            location: string;
+          } => item !== null
         ),
     }));
-  }, [varietyTotals, sizes, formatNumber]);
+  }, [varietyTotals, sizes, formatNumber, formatLocation]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -187,40 +218,57 @@ function IncomingOrderSummarySheetComponent({
 
           {/* Varieties and Quantities */}
           {!isNullVoucher && formattedVarietyTotals.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Varieties & Quantities</h3>
+            <div className="space-y-6">
+              <h3 className="font-semibold text-base">Varieties & Quantities</h3>
               <div className="space-y-4">
                 {formattedVarietyTotals.map((vt) => (
-                  <div key={vt.variety} className="p-4 rounded-lg border bg-card">
-                    <div className="space-y-3">
-                      {/* Header Section */}
-                      <div className="flex items-center justify-between pb-2 border-b">
-                        <h3 className="text-sm font-semibold text-foreground/90">{vt.variety}</h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-muted-foreground">Total:</span>
-                          <span className="text-base font-bold text-primary">
-                            {vt.formattedTotal}
-                          </span>
-                        </div>
+                  <div key={vt.variety} className="rounded-lg border bg-card overflow-hidden">
+                    {/* Variety Header */}
+                    <div className="px-4 py-3 border-b bg-muted/40 flex justify-between items-center">
+                      <div className="px-2 py-1.5 bg-muted/20 border rounded text-xs font-semibold">
+                        Variety: {vt.variety}
                       </div>
-                      {/* Quantities Grid */}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        {vt.formattedQuantities.map((qty) => (
-                          <div key={qty.size} className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">{qty.size}</span>
-                            <span className="text-sm font-semibold text-foreground/90">
-                              {qty.formatted}
-                            </span>
-                          </div>
-                        ))}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground">Total:</span>
+                        <span className="text-base font-bold text-primary">
+                          {vt.formattedTotal}
+                        </span>
                       </div>
                     </div>
+
+                    {/* Quantities Table */}
+                    {vt.formattedQuantities.length > 0 && (
+                      <div className="overflow-x-auto p-3">
+                        <Table className="w-full text-xs">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="px-2 py-1">Size</TableHead>
+                              <TableHead className="px-2 py-1">Location</TableHead>
+                              <TableHead className="px-2 py-1 text-right">Quantity</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {vt.formattedQuantities.map((qty) => (
+                              <TableRow key={qty.size}>
+                                <TableCell className="px-2 py-1">{qty.size}</TableCell>
+                                <TableCell className="px-2 py-1 text-muted-foreground">
+                                  {qty.location}
+                                </TableCell>
+                                <TableCell className="px-2 py-1 text-right font-semibold text-primary">
+                                  {qty.formatted}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
               {/* Grand Total */}
               {formattedVarietyTotals.length > 0 && (
-                <div className="p-4 rounded-lg border bg-muted/50">
+                <div className="rounded-lg border bg-muted/40 p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold text-foreground/90">Grand Total</p>
                     <p className="text-lg font-bold text-primary">{formattedGrandTotal}</p>

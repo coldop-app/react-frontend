@@ -31,7 +31,7 @@ export const useCreateOutgoingOrder = () => {
       setLoading(true);
 
       const { data } = await storeAdminAxiosClient.post<CreateOutgoingOrderApiResponse>(
-        '/store-admin/outgoing-orders',
+        '/outgoing-orders',
         payload
       );
 

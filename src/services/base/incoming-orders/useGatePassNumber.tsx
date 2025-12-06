@@ -1,10 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
+import { useRouterState } from '@tanstack/react-router';
+import storeAdminAxiosClient from '@/lib/axios';
 
 export type Commodity =
   | 'POTATO'
@@ -32,6 +33,8 @@ export const useGetGatePassNumber = (
   commodity: Commodity | undefined,
   type: GatePassType | undefined
 ) => {
+  const router = useRouterState(); // 🔥 detect client-side route/tab changes
+
   const query = useQuery<
     GatePassNumberResponse,
     AxiosError<{ error?: { message?: string }; message?: string }>
@@ -41,15 +44,22 @@ export const useGetGatePassNumber = (
       const { data } = await storeAdminAxiosClient.get<GatePassNumberResponse>(
         `/store-admin/gate-pass-number`,
         {
-          params: { commodity, type }, // ⬅️ now includes type
+          params: { commodity, type },
         }
       );
       return data;
     },
-    enabled: !!commodity && !!type, // Run only when both are provided
+    enabled: !!commodity && !!type, // only run when both exist
   });
 
-  // 🔥 Error toast handler
+  // 🔥 Refetch on every route change (tab switch)
+  useEffect(() => {
+    if (commodity && type) {
+      query.refetch();
+    }
+  }, [router.location.pathname]); // runs on client-side navigation
+
+  // 🔥 Error toast
   useEffect(() => {
     if (query.isError && query.error) {
       const message =

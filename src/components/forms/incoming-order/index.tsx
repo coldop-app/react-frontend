@@ -435,7 +435,7 @@ export default function IncomingOrderPage() {
           }
           return sum;
         }, 0);
-        return { variety: v.variety, total, quantities: v.quantities };
+        return { variety: v.variety, total, quantities: v.quantities, locations: v.locations };
       });
   }, [varieties, sizes]);
 
