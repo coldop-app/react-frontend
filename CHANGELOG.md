@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.6] - 2025-12-06
+
+### Added
+
+- Alert UI component from shadcn/ui with variants and accessibility support
+- Badge UI component from shadcn/ui with multiple variants
+- Screenshot assets for documentation
+
+### Changed
+
+- Enhanced farmer profile component with improved functionality
+- Updated farmer profile helpers with additional utility functions
+- Improved incoming order form and summary sheet components
+- Enhanced order creation hooks for incoming and outgoing orders
+- Updated gate pass number retrieval logic
+- Refined daybook orders service hook
+
 ## [0.3.0-beta.5] - 2025-12-01
 
 ### Added
