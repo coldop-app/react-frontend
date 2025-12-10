@@ -16,7 +16,10 @@ export const useStoreAdminRegisterFarmer = () => {
     mutationFn: async (payload) => {
       const validated = storeAdminFarmerRegisterSchema.parse(payload);
 
-      const res = await storeAdminAxiosClient.post<ApiResponse>('/farmer/register', validated);
+      const res = await storeAdminAxiosClient.post<ApiResponse>(
+        '/store-admin/farmer/register',
+        validated
+      );
 
       return res.data;
     },
