@@ -22,17 +22,17 @@ function SummaryCard({ icon: Icon, title, value, subtitle, color }: SummaryCardP
 
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="w-full">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-              <div className={cn('p-2 rounded-lg', colorVariants[color])}>
-                <Icon className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-2">
+              <div className={cn('p-1.5 sm:p-2 rounded-lg', colorVariants[color])}>
+                <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </div>
-              <span className="font-medium uppercase tracking-wide">{title}</span>
+              <span className="font-medium uppercase tracking-wide truncate">{title}</span>
             </div>
-            <div className="text-3xl font-bold mb-1">{value}</div>
-            <div className="text-sm text-muted-foreground">{subtitle}</div>
+            <div className="text-2xl sm:text-3xl font-bold mb-1 break-words">{value}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{subtitle}</div>
           </div>
         </div>
       </CardContent>
@@ -42,7 +42,7 @@ function SummaryCard({ icon: Icon, title, value, subtitle, color }: SummaryCardP
 
 export function SummaryCards({ data }: { data: typeof analyticsData.inventoryStats }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <SummaryCard
         icon={Package}
         title="Total Inventory"

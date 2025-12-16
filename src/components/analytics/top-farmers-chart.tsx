@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 
 interface FarmerData {
   name: string;
@@ -17,9 +17,23 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
   const chartConfig = {
     bags: {
       label: 'Bags',
-      color: 'hsl(var(--chart-1))',
+      color: 'var(--chart-1)',
     },
   } satisfies ChartConfig;
+
+  // Map data with colors for each farmer
+  const chartColors = [
+    'var(--chart-1)',
+    'var(--chart-2)',
+    'var(--chart-3)',
+    'var(--chart-4)',
+    'var(--chart-5)',
+  ];
+
+  const chartData = data.map((item, index) => ({
+    ...item,
+    fill: chartColors[index % chartColors.length],
+  }));
 
   return (
     <Card>
@@ -29,7 +43,7 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[300px] w-full mb-6">
-          <BarChart data={data} layout="vertical" accessibilityLayer>
+          <BarChart data={chartData} layout="vertical" accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis type="number" tickLine={false} axisLine={false} tickMargin={8} />
             <YAxis
@@ -41,7 +55,11 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
               tickMargin={8}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="bags" fill="var(--color-bags)" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="bags" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Bar>
           </BarChart>
         </ChartContainer>
 
