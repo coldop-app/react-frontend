@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.7] - 2025-12-06
+
+### Added
+
+- Comprehensive analytics dashboard with multiple visualization components
+- Commodity breakdown component with collapsible sections showing variety and bag size details
+- Location analytics table component with detailed farmer breakdown by location
+- Analytics service hooks (`useAnalyticsOverview`, `usePrefetchAnalyticsOverview`) with query key management
+- Analytics type definitions for API responses and data structures
+- Accordion UI component from shadcn/ui for collapsible content sections
+- Commodity filtering functionality across all analytics components
+
+### Changed
+
+- Enhanced analytics overview page with improved data transformation and filtering
+- Updated existing analytics components (capacity utilization, stock summary, stock trend, variety distribution, top farmers) with commodity filtering support
+- Improved analytics data processing with better filtering and aggregation logic
+- Enhanced analytics components with responsive design improvements
+
 ## [0.3.0-beta.6] - 2025-12-06
 
 ### Added
