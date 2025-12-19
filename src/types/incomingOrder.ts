@@ -44,6 +44,7 @@ export interface CreateIncomingOrderInput {
   gatePassNumber: number;
   remarks?: string | null;
   varieties?: IncomingOrderVariety[]; // OPTIONAL for null voucher case
+  date?: string; // OPTIONAL - date in dd.mm.yyyy format
 }
 
 export interface IncomingOrderResponseOrder {
@@ -88,6 +89,7 @@ export interface EditIncomingOrderInput {
   farmerStorageLinkId: string;
   commodity: string;
   gatePassType?: string;
+  date: string;
   gatePassNumber: number;
   remarks?: string | null;
   varieties?: IncomingOrderVariety[];

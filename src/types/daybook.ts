@@ -14,6 +14,7 @@ export interface DaybookOrder {
   type: 'incoming' | 'outgoing';
   farmerStorageLinkId: string;
   coldStorageId: string;
+  date: string; // ISO string
   commodity: string;
   gatePassType: 'RECEIPT' | 'DELIVERY';
   gatePassNumber: number;

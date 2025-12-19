@@ -28,7 +28,7 @@ export const useEditIncomingOrder = () => {
       const { id, ...updateData } = payload;
 
       const { data } = await storeAdminAxiosClient.put<EditIncomingOrderApiResponse>(
-        `/store-admin/incoming-orders/${id}`,
+        `/incoming-orders/${id}`,
         updateData
       );
 

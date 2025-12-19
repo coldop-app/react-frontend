@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { formatDate, formatDateToISO } from '@/lib/helpers';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ export default function EditIncomingOrderDialog({
   const [selectedCommodity, setSelectedCommodity] = useState<string>('');
   const [farmerStorageLinkId, setFarmerStorageLinkId] = useState<string>('');
   const [remarks, setRemarks] = useState<string>('');
+  const [orderDate, setOrderDate] = useState<string>('');
   const remarksRef = useRef<HTMLTextAreaElement>(null);
   const varietyIdCounterRef = useRef(1);
   const { coldStorage } = useStore();
@@ -150,6 +152,7 @@ export default function EditIncomingOrderDialog({
       setFarmerStorageLinkId(order.farmerStorageLinkId);
       setSelectedCommodity(order.commodity);
       setRemarks(order.remarks || '');
+      setOrderDate(formatDate(new Date(order.date)));
       setVarieties(defaultVarieties);
       varietyIdCounterRef.current = initializedVarieties.length;
       setActiveStep(0);
@@ -171,6 +174,7 @@ export default function EditIncomingOrderDialog({
         setSelectedCommodity('');
         setFarmerStorageLinkId('');
         setRemarks('');
+        setOrderDate('');
         setVarieties([]);
         setActiveVarietyTab('');
         varietyIdCounterRef.current = 1;
@@ -439,6 +443,7 @@ export default function EditIncomingOrderDialog({
       commodity: selectedCommodity,
       gatePassType: order.gatePassType,
       gatePassNumber: order.gatePassNumber,
+      date: formatDateToISO(orderDate), // Convert dd.mm.yyyy to ISO format (2025-12-19T00:00:00.000Z)
       remarks: remarks.trim() || null,
       varieties: transformedVarieties,
     };
@@ -456,6 +461,7 @@ export default function EditIncomingOrderDialog({
     varieties,
     sizes,
     remarks,
+    orderDate,
     editIncomingOrderMutation,
     onOpenChange,
   ]);
@@ -493,7 +499,7 @@ export default function EditIncomingOrderDialog({
 
           <CommoditySelector onSelect={handleCommodityChange} defaultValue={selectedCommodity} />
 
-          <DatePicker />
+          <DatePicker value={orderDate} onChange={setOrderDate} />
         </div>
       ),
     },

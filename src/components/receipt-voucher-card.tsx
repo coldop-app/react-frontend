@@ -209,7 +209,7 @@ function ReceiptVoucherCard({
   const mobileNumber = farmer?.mobileNumber ?? 'N/A';
 
   // Format date
-  const formattedDate = useMemo(() => formatDate(data.createdAt), [data.createdAt]);
+  const formattedDate = useMemo(() => formatDate(data.date), [data.date]);
 
   // Get all variety names for display in header
   const varietyNamesDisplay = useMemo(

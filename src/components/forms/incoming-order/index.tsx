@@ -1,6 +1,7 @@
 'use client';
 
 import { FarmerSearch, DatePicker } from '@/components/forms/index';
+import { formatDate, formatDateToISO } from '@/lib/helpers';
 import { VarietyEntry } from '@/components/forms/variety-entry';
 import { Label } from '@/components/ui/label';
 import { IncomingOrderSummarySheet } from './summary-sheet';
@@ -70,6 +71,7 @@ export default function IncomingOrderPage() {
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
   const [selectedCommodity, setSelectedCommodity] = useState<string>('');
   const [farmerStorageLinkId, setFarmerStorageLinkId] = useState<string>('');
+  const [orderDate, setOrderDate] = useState<string>(() => formatDate(new Date()));
   const remarksRef = useRef<HTMLTextAreaElement>(null);
   const varietyIdCounterRef = useRef(1);
   const { coldStorage } = useStore();
@@ -254,11 +256,8 @@ export default function IncomingOrderPage() {
       },
     ]);
 
-    // Clear date
-    const dateInput = document.getElementById('date') as HTMLInputElement;
-    if (dateInput) {
-      dateInput.value = '';
-    }
+    // Reset date to today
+    setOrderDate(formatDate(new Date()));
 
     // Set null voucher mode and open summary sheet
     setIsNullVoucher(true);
@@ -315,6 +314,7 @@ export default function IncomingOrderPage() {
       commodity: validationResult.data.commodity,
       gatePassNumber,
       remarks: validationResult.data.remarks?.trim() || null,
+      date: formatDateToISO(orderDate), // Convert dd.mm.yyyy to ISO format (2025-12-19T00:00:00.000Z)
     };
 
     // For null voucher, varieties array is empty and gatePassType is optional
@@ -390,6 +390,7 @@ export default function IncomingOrderPage() {
         ]);
         setSelectedCommodity('');
         setFarmerStorageLinkId('');
+        setOrderDate(formatDate(new Date())); // Reset to today's date
         setIsNullVoucher(false);
         setSummarySheetOpen(false);
         if (remarksRef.current) {
@@ -407,6 +408,7 @@ export default function IncomingOrderPage() {
     varieties,
     sizes,
     createIncomingOrderMutation,
+    orderDate,
   ]);
 
   // Get farmer name from farmerStorageLinkId
@@ -414,13 +416,6 @@ export default function IncomingOrderPage() {
     if (!farmerStorageLinkId || !farmersQuery.data?.data) return null;
     return farmersQuery.data?.data.find((f) => f.id === farmerStorageLinkId) ?? null;
   }, [farmerStorageLinkId, farmersQuery.data?.data]);
-
-  // Get date value from DatePicker input
-  const orderDate = useMemo(() => {
-    if (typeof document === 'undefined') return '';
-    const dateInput = document.getElementById('date') as HTMLInputElement;
-    return dateInput?.value || '';
-  }, []);
 
   // Calculate total quantities for each variety
   const varietyTotals = useMemo(() => {
@@ -502,7 +497,7 @@ export default function IncomingOrderPage() {
             </div>
 
             <CommoditySelector onSelect={handleCommodityChange} disabled={isNullVoucher} />
-            <DatePicker />
+            <DatePicker value={orderDate} onChange={setOrderDate} />
 
             {/* Varieties Section */}
             <div className="space-y-4">

@@ -4,16 +4,17 @@ import { useAnalyticsOverview } from '@/services/base/analytics/useAnalytics';
 import { SummaryCards } from './summary-cards';
 import { StockSummaryTable } from './stock-summary-table';
 import { CapacityUtilization } from './capacity-utilisation';
-import { StockTrendChart } from './stock-trend-chart';
-import { VarietyDistributionChart } from './variety-distribution-chart';
-import { TopFarmersChart } from './top-farmers-chart';
-import { LocationAnalyticsTable } from './location-analytics-table';
-import { CommodityBreakdown } from './commodity-breakdown';
+// import { StockTrendChart } from './stock-trend-chart';
+// import { VarietyDistributionChart } from './variety-distribution-chart';
+// import { TopFarmersChart } from './top-farmers-chart';
+// import { LocationAnalyticsTable } from './location-analytics-table';
+// import { CommodityBreakdown } from './commodity-breakdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { CommoditySummary } from '@/types/analytics';
 
 export default function AnalyticsPage() {
   const { coldStorage } = useStore();
@@ -140,79 +141,8 @@ export default function AnalyticsPage() {
         : Math.round((filteredTotal / Math.max(summary.totalBagsInitial, filteredTotal)) * 100),
     };
 
-    // Stock summary table - group by variety and size
-    const stockSummaryRows: Array<{
-      variety: string;
-      size40to45: number;
-      sizeAbove50: number;
-      total: number;
-    }> = [];
-
-    filteredCommoditySummary.forEach((commodity) => {
-      commodity.varieties.forEach((variety) => {
-        const row = {
-          variety: `${commodity.commodity} - ${variety.varietyName}`,
-          size40to45: 0,
-          sizeAbove50: 0,
-          total: variety.totalCurrent,
-        };
-
-        variety.bagSizes.forEach((bagSize) => {
-          // Simple heuristic: if size contains numbers, categorize
-          const sizeStr = bagSize.size.toLowerCase();
-          if (
-            sizeStr.includes('40') ||
-            sizeStr.includes('45') ||
-            sizeStr.includes('medium') ||
-            sizeStr.includes('ration')
-          ) {
-            row.size40to45 += bagSize.totalCurrent;
-          } else if (
-            sizeStr.includes('50') ||
-            sizeStr.includes('seed') ||
-            sizeStr.includes('large')
-          ) {
-            row.sizeAbove50 += bagSize.totalCurrent;
-          } else {
-            // Default to 40-45 for unclassified
-            row.size40to45 += bagSize.totalCurrent;
-          }
-        });
-
-        stockSummaryRows.push(row);
-      });
-    });
-
-    // Calculate filtered initial and outgoing totals
-    const filteredInitial = filteredCommoditySummary.reduce(
-      (sum, commodity) =>
-        sum +
-        commodity.varieties.reduce(
-          (varietySum, variety) =>
-            varietySum +
-            variety.bagSizes.reduce((sizeSum, bagSize) => sizeSum + bagSize.totalInitial, 0),
-          0
-        ),
-      0
-    );
-
-    const filteredOutgoing = filteredCommoditySummary.reduce(
-      (sum, commodity) =>
-        sum +
-        commodity.varieties.reduce(
-          (varietySum, variety) =>
-            varietySum +
-            variety.bagSizes.reduce((sizeSum, bagSize) => sizeSum + bagSize.totalOutgoing, 0),
-          0
-        ),
-      0
-    );
-
-    const stockSummary = {
-      current: stockSummaryRows,
-      initial: filteredInitial,
-      outgoing: filteredOutgoing,
-    };
+    // Stock summary table - pass commoditySummary directly
+    const stockSummary = filteredCommoditySummary;
 
     // Stock trend chart
     const stockTrendData = stockTrend.map((point) => ({
@@ -261,7 +191,7 @@ export default function AnalyticsPage() {
     return {
       inventoryStats,
       capacity,
-      stockSummary,
+      stockSummary: stockSummary as CommoditySummary[],
       stockTrend: stockTrendData,
       varietyDistribution,
       topFarmers,
@@ -373,19 +303,19 @@ export default function AnalyticsPage() {
       <StockSummaryTable data={transformedData.stockSummary} />
 
       {/* Stock Trend Chart */}
-      <StockTrendChart data={transformedData.stockTrend} />
+      {/* <StockTrendChart data={transformedData.stockTrend} /> */}
 
       {/* Variety Distribution and Top Farmers */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <VarietyDistributionChart data={transformedData.varietyDistribution} />
         <TopFarmersChart data={transformedData.topFarmers} />
-      </div>
+      </div> */}
 
       {/* Commodity Breakdown */}
-      <CommodityBreakdown data={transformedData.commoditySummary} />
+      {/* <CommodityBreakdown data={transformedData.commoditySummary} /> */}
 
       {/* Location Analytics */}
-      <LocationAnalyticsTable data={transformedData.locationAnalytics} />
+      {/* <LocationAnalyticsTable data={transformedData.locationAnalytics} /> */}
     </div>
   );
 }

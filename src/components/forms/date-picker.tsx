@@ -6,20 +6,17 @@ import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/helpers';
 
-export const DatePicker: React.FC = () => {
+interface DatePickerProps {
+  value?: string; // dd.mm.yyyy format
+  onChange?: (value: string) => void; // Called with dd.mm.yyyy format
+}
+
+export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange }) => {
   const [open, setOpen] = React.useState(false);
 
-  // Helper to format date → dd.mm.yyyy
-  const formatDate = (d: Date) =>
-    `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-
-  // Default to today's date
-  const today = new Date();
-  const [date, setDate] = React.useState<Date | undefined>(today);
-  const [inputValue, setInputValue] = React.useState(formatDate(today));
-
-  // Parse dd.mm.yyyy → Date
+  // Parse the date string to Date object for the calendar
   const parseDate = (str: string): Date | undefined => {
     const [day, month, year] = str.split('.').map(Number);
     if (!day || !month || !year) return undefined;
@@ -27,17 +24,42 @@ export const DatePicker: React.FC = () => {
     return isNaN(parsed.getTime()) ? undefined : parsed;
   };
 
+  // Default to today's date
+  const today = new Date();
+  const defaultDateString = formatDate(today);
+
+  // Use controlled value if provided, otherwise use default
+  const dateString = value ?? defaultDateString;
+
+  const [date, setDate] = React.useState<Date | undefined>(() => parseDate(dateString));
+  const [inputValue, setInputValue] = React.useState(dateString);
+
+  // Sync internal state when controlled value changes
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setInputValue(value);
+      const parsed = parseDate(value);
+      if (parsed) setDate(parsed);
+    }
+  }, [value]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputValue(value);
-    const parsed = parseDate(value);
-    if (parsed) setDate(parsed);
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    const parsed = parseDate(newValue);
+    if (parsed) {
+      setDate(parsed);
+      // Call onChange with formatted date string
+      onChange?.(formatDate(parsed));
+    }
   };
 
   const handleSelect = (selectedDate?: Date) => {
     if (selectedDate) {
       setDate(selectedDate);
-      setInputValue(formatDate(selectedDate));
+      const formatted = formatDate(selectedDate);
+      setInputValue(formatted);
+      onChange?.(formatted);
       setOpen(false);
     }
   };
