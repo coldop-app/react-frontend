@@ -154,7 +154,7 @@ export default function FarmerProfilePage() {
               </TabsList>
               {stockSummaries.map((summary) => (
                 <TabsContent key={summary.commodity} value={summary.commodity} className="mt-6">
-                  <StockSummaryTable summary={summary} />
+                  <StockSummaryTable summary={summary} orders={orders} />
                 </TabsContent>
               ))}
             </Tabs>

@@ -27,6 +27,7 @@ export interface CreateOutgoingOrderInput {
   gatePassType: string; // e.g., "DELIVERY"
   remarks?: string | null;
   varieties: OutgoingOrderVariety[];
+  date?: string; // OPTIONAL - date in ISO format
 }
 
 export interface OutgoingOrderResponseOrder {

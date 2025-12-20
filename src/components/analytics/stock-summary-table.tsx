@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@/stores/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,12 +31,27 @@ interface StockSummaryTableProps {
 
 export function StockSummaryTable({ data }: StockSummaryTableProps) {
   const { coldStorage } = useStore();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('current');
   const initializedBagSizesRef = useRef<Set<string>>(new Set());
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
     // Initialize with all columns visible by default
     return new Set(['commodity', 'variety', 'total']);
   });
+
+  // Handle cell click for navigation
+  const handleCellClick = useCallback(
+    (commodity: string, variety: string) => {
+      navigate({
+        to: '/store-admin/variety-breakdown',
+        search: {
+          commodity,
+          variety,
+        },
+      });
+    },
+    [navigate]
+  );
 
   // Get commodity order from preferences
   const commodityOrder = useMemo(() => {
@@ -382,7 +398,11 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                     {visibleBagSizes.map((size) => {
                       const value = (row[size] as number) || 0;
                       return (
-                        <TableCell key={size} className="text-center">
+                        <TableCell
+                          key={size}
+                          className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => handleCellClick(row.commodity, row.variety)}
+                        >
                           {value > 0 ? (
                             <span className="text-primary font-medium">{value}</span>
                           ) : (
@@ -391,7 +411,10 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                         </TableCell>
                       );
                     })}
-                    <TableCell className="text-center">
+                    <TableCell
+                      className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleCellClick(row.commodity, row.variety)}
+                    >
                       {(row.total as number) > 0 ? (
                         <span className="text-primary font-medium">{row.total}</span>
                       ) : (

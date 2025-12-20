@@ -8,6 +8,7 @@ import { useGetAllFarmers } from '@/services/base/store-admin/functions/useGetAl
 import { useGetOrdersOfFarmer } from '@/services/base/store-admin/functions/useGetOrdersOfFarmer';
 import type { DaybookOrder } from '@/types/daybook';
 import { toast } from 'sonner';
+import { formatDate, formatDateToISO } from '@/lib/helpers';
 
 export function useOutgoingOrder() {
   const [activeStep, setActiveStep] = useState(0);
@@ -23,6 +24,7 @@ export function useOutgoingOrder() {
   const [maxQuantity, setMaxQuantity] = useState<number>(0);
   const [quantityError, setQuantityError] = useState<string>('');
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
+  const [orderDate, setOrderDate] = useState<string>(() => formatDate(new Date()));
   const remarksRef = useRef<HTMLTextAreaElement>(null);
   const autoSelectedCommodityRef = useRef<string>('');
   const { coldStorage } = useStore();
@@ -414,6 +416,11 @@ export function useOutgoingOrder() {
     autoSelectedCommodityRef.current = '';
   }, []);
 
+  // Handle date change
+  const handleDateChange = useCallback((date: string) => {
+    setOrderDate(date);
+  }, []);
+
   // Handle submit
   const handleSubmit = useCallback(() => {
     const gatePassNumber = data?.data?.nextGatePassNumber;
@@ -530,6 +537,7 @@ export function useOutgoingOrder() {
       gatePassType: 'DELIVERY',
       remarks: remarks?.trim() || null,
       varieties,
+      date: formatDateToISO(orderDate), // Convert dd.mm.yyyy to ISO format (2025-12-19T00:00:00.000Z)
     };
 
     createOutgoingOrderMutation.mutate(payload, {
@@ -540,6 +548,7 @@ export function useOutgoingOrder() {
         setSelectedOrders(new Set());
         setQuantities(new Map());
         setActiveStep(0);
+        setOrderDate(formatDate(new Date())); // Reset to today's date
         if (remarksRef.current) {
           remarksRef.current.value = '';
         }
@@ -552,6 +561,7 @@ export function useOutgoingOrder() {
     data?.data?.nextGatePassNumber,
     remarksRef,
     createOutgoingOrderMutation,
+    orderDate,
   ]);
 
   return {
@@ -573,6 +583,7 @@ export function useOutgoingOrder() {
     quantityError,
     summarySheetOpen,
     setSummarySheetOpen,
+    orderDate,
     remarksRef,
     autoSelectedCommodityRef,
 
@@ -593,6 +604,7 @@ export function useOutgoingOrder() {
     // Handlers
     handleCommodityChange,
     handleFarmerSelect,
+    handleDateChange,
     handleSubmit,
     handleColumnToggle,
     getOrderSizeData,

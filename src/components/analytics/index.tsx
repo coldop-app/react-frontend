@@ -5,9 +5,9 @@ import { SummaryCards } from './summary-cards';
 import { StockSummaryTable } from './stock-summary-table';
 import { CapacityUtilization } from './capacity-utilisation';
 // import { StockTrendChart } from './stock-trend-chart';
-// import { VarietyDistributionChart } from './variety-distribution-chart';
-// import { TopFarmersChart } from './top-farmers-chart';
-// import { LocationAnalyticsTable } from './location-analytics-table';
+import { VarietyDistributionChart } from './variety-distribution-chart';
+import { TopFarmersChart } from './top-farmers-chart';
+import { LocationAnalyticsTable } from './location-analytics-table';
 // import { CommodityBreakdown } from './commodity-breakdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -306,16 +306,16 @@ export default function AnalyticsPage() {
       {/* <StockTrendChart data={transformedData.stockTrend} /> */}
 
       {/* Variety Distribution and Top Farmers */}
-      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <VarietyDistributionChart data={transformedData.varietyDistribution} />
         <TopFarmersChart data={transformedData.topFarmers} />
-      </div> */}
+      </div>
 
       {/* Commodity Breakdown */}
       {/* <CommodityBreakdown data={transformedData.commoditySummary} /> */}
 
       {/* Location Analytics */}
-      {/* <LocationAnalyticsTable data={transformedData.locationAnalytics} /> */}
+      <LocationAnalyticsTable data={transformedData.locationAnalytics} />
     </div>
   );
 }

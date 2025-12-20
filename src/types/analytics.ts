@@ -109,3 +109,58 @@ export interface StockDetail {
   initialQuantity: number;
   currentQuantity: number;
 }
+
+/**
+ * Variety Analysis API Response
+ */
+export interface VarietyAnalysisApiResponse {
+  success: boolean;
+  data: VarietyAnalysisData;
+}
+
+/**
+ * Variety Analysis Data Structure
+ */
+export interface VarietyAnalysisData {
+  commodity: string;
+  variety: string;
+  farmers: VarietyAnalysisFarmer[];
+  locations: VarietyAnalysisLocation[];
+}
+
+/**
+ * Farmer breakdown in variety analysis
+ */
+export interface VarietyAnalysisFarmer {
+  farmerId: string;
+  farmerName: string;
+  sizes: VarietyAnalysisSize[];
+  totalInitial: number;
+  totalCurrent: number;
+  totalOutgoing: number;
+}
+
+/**
+ * Location breakdown in variety analysis
+ */
+export interface VarietyAnalysisLocation {
+  location: {
+    chamber: string;
+    floor: string;
+    row: string;
+  };
+  totalInitial: number;
+  totalCurrent: number;
+  totalOutgoing: number;
+  sizes: VarietyAnalysisSize[];
+}
+
+/**
+ * Size breakdown in variety analysis
+ */
+export interface VarietyAnalysisSize {
+  size: string;
+  totalInitial: number;
+  totalCurrent: number;
+  totalOutgoing: number;
+}

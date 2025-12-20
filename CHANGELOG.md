@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.8] - 2025-12-06
+
+### Added
+
+- Variety breakdown page with comprehensive variety analytics
+- Variety analytics components: OverviewCards, GraphicalAnalysis, LocationBreakdown, FarmerBreakdown, SizeTable
+- Variety analysis service hook (`useVarietyAnalysis`, `usePrefetchVarietyAnalysis`) with optimized query management
+- Settings route for store admin configuration
+- Variety analysis types and utilities for data processing
+
+### Changed
+
+- Enhanced analytics components with improved data handling
+- Updated outgoing order form with better validation and error handling
+- Improved farmer profile components with enhanced stock summary display
+- Updated analytics service keys for better query management
+- Enhanced order fetching services with improved error handling
+
 ## [0.3.0-beta.7] - 2025-12-06
 
 ### Added

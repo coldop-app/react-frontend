@@ -33,6 +33,7 @@ export default function OutgoingOrderPage() {
     summarySheetOpen,
     setSummarySheetOpen,
     selectedBags,
+    orderDate,
     remarksRef,
 
     // Data
@@ -49,6 +50,7 @@ export default function OutgoingOrderPage() {
     // Handlers
     handleCommodityChange,
     handleFarmerSelect,
+    handleDateChange,
     handleSubmit,
     handleColumnToggle,
     getOrderSizeData,
@@ -107,9 +109,11 @@ export default function OutgoingOrderPage() {
             availableCommodities={availableCommodities}
             availableVarieties={availableVarieties}
             incomingOrders={incomingOrders}
+            orderDate={orderDate}
             onFarmerSelect={handleFarmerSelect}
             onCommodityChange={handleCommodityChange}
             onVarietyChange={setSelectedVariety}
+            onDateChange={handleDateChange}
             onColumnToggle={handleColumnToggle}
             onOrderToggle={handleOrderToggle}
             onCardClick={handleCardClick}

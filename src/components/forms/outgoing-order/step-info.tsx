@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { FarmerSearch } from '@/components/forms';
+import { FarmerSearch, DatePicker } from '@/components/forms';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
@@ -59,9 +59,11 @@ interface StepInfoProps {
   availableCommodities: string[];
   availableVarieties: string[];
   incomingOrders: DaybookOrder[];
+  orderDate: string;
   onFarmerSelect: (id: string) => void;
   onCommodityChange: (commodity: string) => void;
   onVarietyChange: (variety: string) => void;
+  onDateChange: (date: string) => void;
   onColumnToggle: (size: string) => void;
   onOrderToggle: (orderId: string) => void;
   onCardClick: (
@@ -97,9 +99,11 @@ export const StepInfo: React.FC<StepInfoProps> = ({
   availableCommodities,
   availableVarieties,
   incomingOrders,
+  orderDate,
   onFarmerSelect,
   onCommodityChange,
   onVarietyChange,
+  onDateChange,
   onColumnToggle,
   onOrderToggle,
   onCardClick,
@@ -151,6 +155,9 @@ export const StepInfo: React.FC<StepInfoProps> = ({
           )}
         </div>
       )}
+
+      {/* Date Picker */}
+      {farmerStorageLinkId && <DatePicker value={orderDate} onChange={onDateChange} />}
 
       {/* Variety Selector */}
       {selectedCommodity && availableVarieties.length > 0 && (
