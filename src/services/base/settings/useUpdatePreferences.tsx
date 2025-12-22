@@ -142,7 +142,7 @@ export const useUpdatePreferences = () => {
     },
 
     // Always refetch after error or success to ensure we have the latest data
-    onSettled: (data, error, variables) => {
+    onSettled: (_data, _error, variables) => {
       const queryKey = preferencesKeys.detail({ preferencesId: variables.preferencesId });
       queryClient.invalidateQueries({ queryKey });
     },
