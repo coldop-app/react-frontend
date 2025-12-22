@@ -93,6 +93,7 @@ export const VarietyEntry: React.FC<VarietyEntryProps> = ({
       <CardContent className="space-y-6">
         {/* Variety Selector */}
         <VarietySelector
+          key={`${varietyId}-${commodity || 'no-commodity'}`}
           id={`variety-selector-${varietyId}`}
           onSelect={handleVarietySelect}
           disabled={disabled}

@@ -93,10 +93,14 @@ export default function IncomingOrderPage() {
     return coldStorage?.preferences?.incoming?.showCustomMarka ?? false;
   }, [coldStorage?.preferences?.incoming?.showCustomMarka]);
 
-  // Get available varieties from preferences
+  // Get available varieties from preferences based on selected commodity
   const availableVarieties = useMemo(() => {
-    return coldStorage?.preferences?.varieties ?? [];
-  }, [coldStorage?.preferences?.varieties]);
+    if (!selectedCommodity) return [];
+    return (
+      coldStorage?.preferences?.commodities?.find((c) => c.name === selectedCommodity)?.varieties ??
+      []
+    );
+  }, [coldStorage?.preferences?.commodities, selectedCommodity]);
 
   // Generate a stable ID for variety entries
   const generateVarietyId = useCallback(() => {
@@ -514,7 +518,7 @@ export default function IncomingOrderPage() {
                   size="sm"
                   onClick={handleAddVariety}
                   className="gap-2"
-                  disabled={isNullVoucher}
+                  disabled={isNullVoucher || !selectedCommodity}
                 >
                   <Plus className="h-4 w-4" />
                   Add Variety
@@ -546,7 +550,7 @@ export default function IncomingOrderPage() {
                       }
                     }}
                     canRemove={varieties.length > 1}
-                    disabled={isNullVoucher}
+                    disabled={isNullVoucher || !selectedCommodity}
                   />
                 ))}
               </div>

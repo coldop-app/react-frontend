@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { useVarietyAnalysis } from '@/services/base/analytics/useVarietyAnalysis';
 import { OverviewCards } from '@/components/variety-analytics/OverviewCards';
 import { GraphicalAnalysis } from '@/components/variety-analytics/GraphicalAnalysis';
@@ -6,6 +7,7 @@ import { FarmerBreakdown } from '@/components/variety-analytics/FarmerBreakdown'
 import { LocationBreakdown } from '@/components/variety-analytics/LocationBreakdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,30 +15,78 @@ import {
   prepareLocationChartData,
   prepareFarmerChartData,
   calculateTotalQuantity,
+  filterFarmersBySize,
+  filterLocationsBySize,
 } from '@/components/variety-analytics/utils';
 
 interface VarietyAnalyticsPageProps {
   storageId: string;
   commodity: string;
   variety: string;
+  bagSize?: string;
 }
 
 export const VarietyAnalyticsPage = ({
   storageId,
   commodity,
   variety,
+  bagSize,
 }: VarietyAnalyticsPageProps) => {
+  const navigate = useNavigate();
   const { data, isLoading, isError, error, refetch, isFetching } = useVarietyAnalysis({
     storageId,
     commodity,
     variety,
   });
 
-  // Transform data for components
+  // Get all available bag sizes from the data with their total quantities
+  const { availableBagSizes, bagSizeTotals } = useMemo(() => {
+    if (!data?.data) return { availableBagSizes: [], bagSizeTotals: new Map<string, number>() };
+
+    const sizeMap = new Map<string, number>();
+    const sizeSet = new Set<string>();
+
+    data.data.farmers.forEach((farmer) => {
+      farmer.sizes.forEach((size) => {
+        if (size.totalCurrent > 0) {
+          sizeSet.add(size.size);
+          const currentTotal = sizeMap.get(size.size) || 0;
+          sizeMap.set(size.size, currentTotal + size.totalCurrent);
+        }
+      });
+    });
+
+    const sortedSizes = Array.from(sizeSet).sort((a, b) => {
+      // Try to sort by numeric value if possible
+      const numA = parseFloat(a);
+      const numB = parseFloat(b);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numA - numB;
+      }
+      return a.localeCompare(b);
+    });
+
+    return {
+      availableBagSizes: sortedSizes,
+      bagSizeTotals: sizeMap,
+    };
+  }, [data]);
+
+  // Transform data for components, filtering by bagSize if provided
   const transformedData = useMemo(() => {
     if (!data?.data) return null;
 
-    const varietyData = data.data;
+    let varietyData = data.data;
+
+    // Filter by bagSize if provided
+    if (bagSize) {
+      varietyData = {
+        ...varietyData,
+        farmers: filterFarmersBySize(varietyData.farmers, bagSize),
+        locations: filterLocationsBySize(varietyData.locations, bagSize),
+      };
+    }
+
     const totalQuantity = calculateTotalQuantity(varietyData.farmers);
 
     return {
@@ -45,7 +95,19 @@ export const VarietyAnalyticsPage = ({
       locationData: prepareLocationChartData(varietyData.locations),
       farmerData: prepareFarmerChartData(varietyData.farmers, totalQuantity),
     };
-  }, [data]);
+  }, [data, bagSize]);
+
+  // Handle bag size tab change
+  const handleBagSizeChange = (newBagSize: string) => {
+    navigate({
+      to: '/store-admin/variety-breakdown',
+      search: {
+        commodity,
+        variety,
+        bagSize: newBagSize === 'all' ? undefined : newBagSize,
+      },
+    });
+  };
 
   // Loading state
   if (isLoading) {
@@ -110,6 +172,7 @@ export const VarietyAnalyticsPage = ({
           <h1 className="text-2xl sm:text-3xl font-bold">Variety Analysis</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Detailed inventory breakdown for {commodity} - {variety}
+            {bagSize && ` - ${bagSize}`}
           </p>
         </div>
         <Button
@@ -123,6 +186,37 @@ export const VarietyAnalyticsPage = ({
           <span className="hidden sm:inline">Refresh</span>
         </Button>
       </div>
+
+      {/* Bag Size Tabs */}
+      {availableBagSizes.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Filter by Bag Size</h3>
+              <Tabs value={bagSize || 'all'} onValueChange={handleBagSizeChange} className="w-full">
+                <TabsList className="w-full sm:w-auto flex-wrap">
+                  <TabsTrigger value="all" className="text-xs sm:text-sm">
+                    All Sizes
+                    {data?.data && (
+                      <span className="ml-1">
+                        ({calculateTotalQuantity(data.data.farmers).toLocaleString()})
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  {availableBagSizes.map((size) => {
+                    const total = bagSizeTotals.get(size) || 0;
+                    return (
+                      <TabsTrigger key={size} value={size} className="text-xs sm:text-sm">
+                        {size} ({total.toLocaleString()})
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </Tabs>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Overview Section */}
       <OverviewCards data={transformedData.varietyData} />

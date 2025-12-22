@@ -30,6 +30,7 @@ interface StoreState {
 
   setLoading: (loading: boolean) => void;
   setHasHydrated: (state: boolean) => void;
+  updatePreferences: (preferences: ColdStorage['preferences']) => void;
 }
 
 type PersistedState = Pick<StoreState, 'admin' | 'coldStorage' | 'token' | 'receiptVisibleColumns'>;
@@ -128,6 +129,18 @@ export const useStore = create(
 
       setLoading: (loading) => set({ isLoading: loading }),
       setHasHydrated: (state) => set({ _hasHydrated: state }),
+
+      updatePreferences: (preferences) => {
+        const current = get().coldStorage;
+        if (current) {
+          set({
+            coldStorage: {
+              ...current,
+              preferences,
+            },
+          });
+        }
+      },
     }),
 
     {

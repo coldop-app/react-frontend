@@ -15,7 +15,27 @@ import {
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
-const navigationItems = [
+type NavigationItemWithChildren = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: Array<{ name: string; href: string }>;
+};
+
+type NavigationItemWithoutChildren = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  activePaths?: string[];
+};
+
+type NavigationItem = NavigationItemWithChildren | NavigationItemWithoutChildren;
+
+function hasChildren(item: NavigationItem): item is NavigationItemWithChildren {
+  return 'children' in item && item.children !== undefined;
+}
+
+const navigationItems: NavigationItem[] = [
   {
     name: 'Daybook',
     href: '/store-admin/daybook',
@@ -36,6 +56,7 @@ const navigationItems = [
     name: 'Analytics',
     href: '/store-admin/analytics',
     icon: BarChart3,
+    activePaths: ['/store-admin/analytics', '/store-admin/variety-breakdown'],
   },
   {
     name: 'Settings',
@@ -88,13 +109,14 @@ const AppSidebar = () => {
 
   const navigationItemsWithState = useMemo(() => {
     return navigationItems.map((item) => {
-      if (item.children) {
+      if (hasChildren(item)) {
         const isActive =
           pathname === item.href || item.children.some((c) => pathname.startsWith(c.href));
 
         return { ...item, isActive, isOpen, setOpen: handleOpenChange };
       }
 
+      // TypeScript now knows item is NavigationItemWithoutChildren
       const isActive =
         pathname === item.href ||
         (item.activePaths
@@ -118,7 +140,7 @@ const AppSidebar = () => {
               {navigationItemsWithState.map((item) => {
                 const Icon = item.icon;
 
-                if (item.children) {
+                if (hasChildren(item)) {
                   return (
                     <SidebarMenuItem key={item.name}>
                       <Collapsible

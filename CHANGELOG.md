@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.9] - 2025-12-06
+
+### Added
+
+- Comprehensive preferences management page with full CRUD operations for commodities, bag sizes, and varieties
+- Drag-and-drop reordering functionality for commodities, bag sizes, and varieties using @dnd-kit
+- Optimistic updates for instant UI feedback when updating preferences
+- Store state synchronization - preferences updates automatically sync with Zustand store
+- Modular component architecture for preferences settings (CommodityTabs, BagSizesList, VarietiesTable, etc.)
+- Confirmation dialogs for all delete operations to prevent accidental data loss
+- SortableItem and SortableTableRow reusable components for drag-and-drop functionality
+- Preferences service hooks (usePreferences, useUpdatePreferences) with query key management
+
+### Changed
+
+- Refactored preferences settings into smaller, maintainable components
+- Enhanced preferences update mutation with optimistic updates and automatic rollback on errors
+- Improved preferences type definitions to include message property in API responses
+- Updated store to include updatePreferences method for state synchronization
+
 ## [0.3.0-beta.8] - 2025-12-06
 
 ### Added

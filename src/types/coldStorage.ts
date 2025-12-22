@@ -19,15 +19,16 @@ export interface ColdStoragePreferences {
   id: string;
   commodities: {
     name: string;
+    varieties: string[];
     sizes: string[];
   }[];
   generation: string | null;
   rouging: string | null;
   tuberType: string | null;
   grader: string | null;
-  varieties?: string[];
 
   incoming: {
     showCustomMarka: boolean;
   };
+  customFields: Record<string, unknown> | null;
 }

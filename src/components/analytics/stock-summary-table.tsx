@@ -41,12 +41,13 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
 
   // Handle cell click for navigation
   const handleCellClick = useCallback(
-    (commodity: string, variety: string) => {
+    (commodity: string, variety: string, bagSize?: string) => {
       navigate({
         to: '/store-admin/variety-breakdown',
         search: {
           commodity,
           variety,
+          ...(bagSize && { bagSize }),
         },
       });
     },
@@ -401,7 +402,7 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                         <TableCell
                           key={size}
                           className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                          onClick={() => handleCellClick(row.commodity, row.variety)}
+                          onClick={() => handleCellClick(row.commodity, row.variety, size)}
                         >
                           {value > 0 ? (
                             <span className="text-primary font-medium">{value}</span>

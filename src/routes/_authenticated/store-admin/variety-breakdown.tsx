@@ -6,6 +6,7 @@ import { useStore } from '@/stores/store';
 const varietyBreakdownSearchSchema = z.object({
   commodity: z.string(),
   variety: z.string(),
+  bagSize: z.string().optional(),
 });
 
 export const Route = createFileRoute('/_authenticated/store-admin/variety-breakdown')({
@@ -14,7 +15,7 @@ export const Route = createFileRoute('/_authenticated/store-admin/variety-breakd
 });
 
 function RouteComponent() {
-  const { commodity, variety } = Route.useSearch();
+  const { commodity, variety, bagSize } = Route.useSearch();
 
   const { admin } = useStore();
 
@@ -34,5 +35,12 @@ function RouteComponent() {
     );
   }
 
-  return <VarietyAnalyticsPage storageId={storageId} commodity={commodity} variety={variety} />;
+  return (
+    <VarietyAnalyticsPage
+      storageId={storageId}
+      commodity={commodity}
+      variety={variety}
+      bagSize={bagSize}
+    />
+  );
 }

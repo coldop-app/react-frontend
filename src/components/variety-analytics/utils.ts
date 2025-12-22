@@ -67,3 +67,49 @@ export function prepareFarmerChartData(
 export function calculateTotalQuantity(farmers: VarietyAnalysisFarmer[]): number {
   return farmers.reduce((sum, farmer) => sum + farmer.totalCurrent, 0);
 }
+
+/**
+ * Filter farmers by bag size
+ */
+export function filterFarmersBySize(
+  farmers: VarietyAnalysisFarmer[],
+  bagSize: string
+): VarietyAnalysisFarmer[] {
+  return farmers
+    .map((farmer) => {
+      const sizeData = farmer.sizes.find((s) => s.size === bagSize);
+      if (!sizeData || sizeData.totalCurrent === 0) return null;
+
+      return {
+        ...farmer,
+        sizes: [sizeData],
+        totalInitial: sizeData.totalInitial,
+        totalCurrent: sizeData.totalCurrent,
+        totalOutgoing: sizeData.totalOutgoing,
+      };
+    })
+    .filter((farmer): farmer is VarietyAnalysisFarmer => farmer !== null);
+}
+
+/**
+ * Filter locations by bag size
+ */
+export function filterLocationsBySize(
+  locations: VarietyAnalysisData['locations'],
+  bagSize: string
+): VarietyAnalysisData['locations'] {
+  return locations
+    .map((location) => {
+      const sizeData = location.sizes.find((s) => s.size === bagSize);
+      if (!sizeData || sizeData.totalCurrent === 0) return null;
+
+      return {
+        ...location,
+        sizes: [sizeData],
+        totalInitial: sizeData.totalInitial,
+        totalCurrent: sizeData.totalCurrent,
+        totalOutgoing: sizeData.totalOutgoing,
+      };
+    })
+    .filter((location): location is VarietyAnalysisData['locations'][number] => location !== null);
+}

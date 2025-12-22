@@ -70,10 +70,14 @@ export default function EditIncomingOrderDialog({
     return coldStorage?.preferences?.incoming?.showCustomMarka ?? false;
   }, [coldStorage?.preferences?.incoming?.showCustomMarka]);
 
-  // Get available varieties from preferences
+  // Get available varieties from preferences based on selected commodity
   const availableVarieties = useMemo(() => {
-    return coldStorage?.preferences?.varieties ?? [];
-  }, [coldStorage?.preferences?.varieties]);
+    if (!selectedCommodity) return [];
+    return (
+      coldStorage?.preferences?.commodities?.find((c) => c.name === selectedCommodity)?.varieties ??
+      []
+    );
+  }, [coldStorage?.preferences?.commodities, selectedCommodity]);
 
   // Generate a stable ID for variety entries
   const generateVarietyId = useCallback(() => {
@@ -566,6 +570,7 @@ export default function EditIncomingOrderDialog({
                   <div className="space-y-3">
                     <Label className="text-sm font-medium text-foreground">Select Variety</Label>
                     <VarietySelector
+                      key={`${varietyData.id}-${selectedCommodity || 'no-commodity'}`}
                       id={`variety-selector-${varietyData.id}`}
                       onSelect={(value) => handleVarietyChange(varietyData.id, value)}
                       varieties={availableVarieties}
