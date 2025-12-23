@@ -127,8 +127,8 @@ export const StepInfo: React.FC<StepInfoProps> = ({
         </div>
       </div>
 
-      {/* Commodity Selector */}
-      {farmerStorageLinkId && (
+      {/* Commodity Selector - Only show if more than one commodity */}
+      {farmerStorageLinkId && availableCommodities.length > 1 && (
         <div className="space-y-3">
           <Label htmlFor="commodity" className="text-base font-medium">
             Select Commodity

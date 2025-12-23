@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -14,6 +15,21 @@ interface FarmerData {
 }
 
 export function TopFarmersChart({ data }: { data: FarmerData[] }) {
+  const [yAxisWidth, setYAxisWidth] = useState(120);
+  const [tickFontSize, setTickFontSize] = useState(12);
+
+  // Adjust YAxis width based on screen size
+  useEffect(() => {
+    const updateWidth = () => {
+      const isMobile = window.innerWidth < 640;
+      setYAxisWidth(isMobile ? 70 : 120);
+      setTickFontSize(isMobile ? 10 : 12);
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
   const chartConfig = {
     bags: {
       label: 'Bags',
@@ -38,21 +54,38 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Farmers</CardTitle>
-        <CardDescription>Farmers with the highest storage inventory</CardDescription>
+        <CardTitle className="text-lg sm:text-xl">Top Farmers</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
+          Farmers with the highest storage inventory
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="min-h-[300px] w-full mb-6">
-          <BarChart data={chartData} layout="vertical" accessibilityLayer>
+        <ChartContainer
+          config={chartConfig}
+          className="min-h-[250px] sm:min-h-[300px] w-full mb-4 sm:mb-6"
+        >
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            accessibilityLayer
+            margin={{ top: 5, right: 10, bottom: 5, left: 5 }}
+          >
             <CartesianGrid vertical={false} />
-            <XAxis type="number" tickLine={false} axisLine={false} tickMargin={8} />
+            <XAxis
+              type="number"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tick={{ fontSize: 12 }}
+            />
             <YAxis
               type="category"
               dataKey="name"
               tickLine={false}
               axisLine={false}
-              width={120}
+              width={yAxisWidth}
               tickMargin={8}
+              tick={{ fontSize: tickFontSize }}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="bags" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
@@ -64,16 +97,20 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
         </ChartContainer>
 
         <div className="space-y-4">
-          <h3 className="font-semibold">Top Farmer Insights</h3>
+          <h3 className="font-semibold text-sm sm:text-base">Top Farmer Insights</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Top Contributor</span>
-              <span className="font-medium">{data[0].name}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">Top Contributor</span>
+              <span className="font-medium text-xs sm:text-sm truncate ml-2">
+                {data[0]?.name || 'N/A'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Storage Share</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">Storage Share</span>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">{data[0].storageShare}%</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">
+                  {data[0]?.storageShare || 0}%
+                </div>
                 <div className="text-xs text-muted-foreground">of total inventory</div>
               </div>
             </div>

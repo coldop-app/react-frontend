@@ -65,10 +65,10 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-center mb-4 sm:mb-6">
+        <div className="flex items-center justify-center mb-4 sm:mb-6 px-2">
           <ChartContainer
             config={chartConfig}
-            className="min-h-[200px] sm:min-h-[300px] w-full max-w-[250px] sm:max-w-[300px]"
+            className="min-h-[180px] sm:min-h-[300px] w-full max-w-[200px] sm:max-w-[300px]"
           >
             <PieChart>
               <Pie
@@ -76,7 +76,7 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
                 cx="50%"
                 cy="50%"
                 innerRadius={0}
-                outerRadius={80}
+                outerRadius="60%"
                 paddingAngle={2}
                 dataKey="value"
               >

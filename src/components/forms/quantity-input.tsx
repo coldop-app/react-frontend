@@ -99,7 +99,7 @@ export const QuantityInputSection: React.FC<QuantityInputSectionProps> = ({
   const content = (
     <div className="space-y-6">
       {sizes.map((size, index) => (
-        <div key={size} className="space-y-3">
+        <div key={size} className="space-y-4">
           <div className="flex items-center justify-between gap-4">
             <Label className="text-base font-medium min-w-[80px]">{size}</Label>
             <div className="flex items-center gap-3 flex-1 max-w-md">
@@ -137,10 +137,10 @@ export const QuantityInputSection: React.FC<QuantityInputSectionProps> = ({
           {index < sizes.length - 1 && <Separator className="mt-2" />}
         </div>
       ))}
-      <div className="pt-4 border-t">
-        <div className="flex items-center justify-between">
-          <Label className="text-base font-semibold">Total Quantity</Label>
-          <div className="text-lg font-bold text-primary">
+      <div className="pt-6 border-t mt-6">
+        <div className="flex items-center justify-between bg-primary/10 rounded-lg px-4 py-3 border border-primary/20">
+          <Label className="text-base font-semibold text-foreground">Total Quantity</Label>
+          <div className="text-2xl font-bold text-primary">
             {totalQuantity > 0
               ? totalQuantity.toLocaleString('en-US', { maximumFractionDigits: 2 })
               : '0'}

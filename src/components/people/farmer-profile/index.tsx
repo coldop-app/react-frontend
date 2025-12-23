@@ -3,7 +3,16 @@ import { useRouterState, useParams } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { User, Phone, MapPin, CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  User,
+  Phone,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  ChevronDown,
+  ChevronUp,
+  Package,
+} from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetOrdersOfFarmer } from '@/services/base/store-admin/functions/useGetOrdersOfFarmer';
 import type { StoreAdminFarmer } from '@/services/base/store-admin/functions/useGetAllFarmers';
@@ -75,6 +84,13 @@ export default function FarmerProfilePage() {
     return commodities[0] || '';
   }, [coldStorage, commodities]);
 
+  // Calculate total current bags across all commodities
+  const totalBags = useMemo(() => {
+    return stockSummaries.reduce((sum, summary) => {
+      return sum + (summary.totals.current.total || 0);
+    }, 0);
+  }, [stockSummaries]);
+
   if (!farmer) {
     return (
       <div className="p-4">
@@ -129,6 +145,15 @@ export default function FarmerProfilePage() {
                 <p className="text-muted-foreground">{farmer.address}</p>
               </div>
             </div>
+            {!isLoading && (
+              <div className="flex items-center gap-3">
+                <Package className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Total Bags</p>
+                  <p className="text-muted-foreground">{totalBags.toLocaleString()}</p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

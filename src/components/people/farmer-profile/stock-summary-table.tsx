@@ -144,7 +144,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
             {dataRows.map((row, idx) => (
               <TableRow key={`${row.variety}-${idx}`} className="hover:bg-transparent">
                 <TableCell
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="cursor-pointer hover:bg-muted hover:ring-1 hover:ring-primary/20 transition-all duration-150"
                   onClick={() => handleCellClick(row.variety, 'variety', 0, idx, false)}
                 >
                   {row.variety}
@@ -152,7 +152,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                 {bagSizes.map((size) => (
                   <TableCell
                     key={size}
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="cursor-pointer hover:bg-muted hover:ring-1 hover:ring-primary/20 transition-all duration-150"
                     onClick={() =>
                       handleCellClick(row.variety, size, row[size] as number, idx, false)
                     }
@@ -161,7 +161,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                   </TableCell>
                 ))}
                 <TableCell
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="cursor-pointer hover:bg-muted hover:ring-1 hover:ring-primary/20 transition-all duration-150"
                   onClick={() =>
                     handleCellClick(row.variety, 'total', row.total as number, idx, false)
                   }
@@ -173,7 +173,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
             {totalsRow.length > 0 && (
               <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableCell
-                  className="font-bold cursor-pointer hover:bg-muted transition-colors"
+                  className="font-bold cursor-pointer hover:bg-muted/70 hover:ring-1 hover:ring-primary/20 transition-all duration-150"
                   onClick={() => handleCellClick('Total', 'variety', 0, -1, true)}
                 >
                   Total
@@ -181,7 +181,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                 {bagSizes.map((size) => (
                   <TableCell
                     key={size}
-                    className="font-bold cursor-pointer hover:bg-muted transition-colors"
+                    className="font-bold cursor-pointer hover:bg-muted/70 hover:ring-1 hover:ring-primary/20 transition-all duration-150"
                     onClick={() =>
                       handleCellClick('Total', size, totalsRow[0][size] as number, -1, true)
                     }
@@ -190,7 +190,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                   </TableCell>
                 ))}
                 <TableCell
-                  className="font-bold cursor-pointer hover:bg-muted transition-colors"
+                  className="font-bold cursor-pointer hover:bg-muted/70 hover:ring-1 hover:ring-primary/20 transition-all duration-150"
                   onClick={() =>
                     handleCellClick('Total', 'total', totalsRow[0].total as number, -1, true)
                   }
@@ -300,50 +300,62 @@ function BreakdownDialog({ alertData, onClose, orders, commodity, tabType }: Bre
 
   return (
     <AlertDialog open={!!alertData} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center justify-between">
-            <span>{getTitle()}</span>
-            <span className="text-lg font-semibold text-primary">
+      <AlertDialogContent className="w-[95vw] max-w-3xl max-h-[85vh] flex flex-col p-0">
+        <AlertDialogHeader className="px-6 pt-6 pb-4 flex-shrink-0">
+          <AlertDialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-base sm:text-lg break-words">{getTitle()}</span>
+            <span className="text-base sm:text-lg font-semibold text-primary whitespace-nowrap">
               Total: {totalQuantity.toLocaleString()}
             </span>
           </AlertDialogTitle>
-          <AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogDescription asChild>
+          <div className="flex-1 overflow-hidden flex flex-col px-6 pb-4">
             {breakdownEntries.length === 0 ? (
               <p className="text-muted-foreground py-4">No entries found for this selection.</p>
             ) : (
-              <div className="mt-4">
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Size</TableHead>
-                        <TableHead className="text-center">Location</TableHead>
-                        <TableHead className="text-right">Quantity</TableHead>
-                        <TableHead className="text-right">Voucher Number</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {breakdownEntries.map((entry, idx) => (
-                        <TableRow
-                          key={`${entry.voucherNumber}-${entry.location}-${entry.size}-${idx}`}
-                        >
-                          <TableCell className="font-medium">{entry.size}</TableCell>
-                          <TableCell className="text-center">{entry.location}</TableCell>
-                          <TableCell className="text-right text-primary font-semibold">
-                            {entry.quantity.toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right">{entry.voucherNumber}</TableCell>
+              <div className="flex-1 overflow-auto -mx-2 px-2">
+                <div className="rounded-md border min-w-full">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap">Size</TableHead>
+                          <TableHead className="text-center whitespace-nowrap">Location</TableHead>
+                          <TableHead className="text-right whitespace-nowrap">Quantity</TableHead>
+                          <TableHead className="text-right whitespace-nowrap">
+                            Voucher Number
+                          </TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {breakdownEntries.map((entry, idx) => (
+                          <TableRow
+                            key={`${entry.voucherNumber}-${entry.location}-${entry.size}-${idx}`}
+                          >
+                            <TableCell className="font-medium whitespace-nowrap">
+                              {entry.size}
+                            </TableCell>
+                            <TableCell className="text-center whitespace-nowrap">
+                              {entry.location}
+                            </TableCell>
+                            <TableCell className="text-right text-primary font-semibold whitespace-nowrap">
+                              {entry.quantity.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right whitespace-nowrap">
+                              {entry.voucherNumber}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
             )}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
+          </div>
+        </AlertDialogDescription>
+        <AlertDialogFooter className="px-6 pb-6 pt-4 flex-shrink-0">
           <AlertDialogAction>OK</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

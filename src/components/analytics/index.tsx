@@ -4,11 +4,11 @@ import { useAnalyticsOverview } from '@/services/base/analytics/useAnalytics';
 import { SummaryCards } from './summary-cards';
 import { StockSummaryTable } from './stock-summary-table';
 import { CapacityUtilization } from './capacity-utilisation';
-// import { StockTrendChart } from './stock-trend-chart';
+import { StockTrendChart } from './stock-trend-chart';
 import { VarietyDistributionChart } from './variety-distribution-chart';
 import { TopFarmersChart } from './top-farmers-chart';
 import { LocationAnalyticsTable } from './location-analytics-table';
-// import { CommodityBreakdown } from './commodity-breakdown';
+import { CommodityBreakdown } from './commodity-breakdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, RefreshCw } from 'lucide-react';
@@ -28,7 +28,26 @@ export default function AnalyticsPage() {
     return data.data.commoditySummary.map((c) => c.commodity);
   }, [data]);
 
-  const [selectedCommodity, setSelectedCommodity] = useState<string>('all');
+  const [selectedCommodityState, setSelectedCommodityState] = useState<string>('all');
+
+  // Derive the effective selected commodity - if only one commodity exists, use it; otherwise use state
+  const selectedCommodity = useMemo(() => {
+    if (commodities.length === 1) {
+      return commodities[0];
+    }
+    // If selected commodity is not available, default to 'all'
+    if (selectedCommodityState !== 'all' && !commodities.includes(selectedCommodityState)) {
+      return 'all';
+    }
+    return selectedCommodityState;
+  }, [commodities, selectedCommodityState]);
+
+  const setSelectedCommodity = (value: string) => {
+    // Only allow setting if there are multiple commodities
+    if (commodities.length > 1) {
+      setSelectedCommodityState(value);
+    }
+  };
 
   // Transform API data for components
   const transformedData = useMemo(() => {
@@ -283,7 +302,7 @@ export default function AnalyticsPage() {
       {commodities.length > 0 && (
         <Tabs value={selectedCommodity} onValueChange={setSelectedCommodity}>
           <TabsList className="w-full justify-start overflow-x-auto">
-            <TabsTrigger value="all">All Commodities</TabsTrigger>
+            {commodities.length > 1 && <TabsTrigger value="all">All Commodities</TabsTrigger>}
             {commodities.map((commodity) => (
               <TabsTrigger key={commodity} value={commodity}>
                 {commodity}
@@ -303,7 +322,7 @@ export default function AnalyticsPage() {
       <StockSummaryTable data={transformedData.stockSummary} />
 
       {/* Stock Trend Chart */}
-      {/* <StockTrendChart data={transformedData.stockTrend} /> */}
+      <StockTrendChart data={transformedData.stockTrend} />
 
       {/* Variety Distribution and Top Farmers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -311,11 +330,11 @@ export default function AnalyticsPage() {
         <TopFarmersChart data={transformedData.topFarmers} />
       </div>
 
-      {/* Commodity Breakdown */}
-      {/* <CommodityBreakdown data={transformedData.commoditySummary} /> */}
-
       {/* Location Analytics */}
       <LocationAnalyticsTable data={transformedData.locationAnalytics} />
+
+      {/* Commodity Breakdown - Only show if more than one commodity */}
+      {commodities.length > 1 && <CommodityBreakdown data={transformedData.commoditySummary} />}
     </div>
   );
 }

@@ -34,9 +34,21 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('current');
   const initializedBagSizesRef = useRef<Set<string>>(new Set());
+
+  // Get unique commodities count
+  const uniqueCommoditiesCount = useMemo(() => {
+    const commodities = new Set(data.map((item) => item.commodity));
+    return commodities.size;
+  }, [data]);
+
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
-    // Initialize with all columns visible by default
-    return new Set(['commodity', 'variety', 'total']);
+    // Initialize with all columns visible by default, except commodity if there's only one
+    const commodities = new Set(data.map((item) => item.commodity));
+    const initialColumns = ['variety', 'total'];
+    if (commodities.size > 1) {
+      initialColumns.push('commodity');
+    }
+    return new Set(initialColumns);
   });
 
   // Handle cell click for navigation
@@ -222,15 +234,36 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
           allBagSizes.forEach((size) => {
             newSet.add(size);
           });
-          // Ensure commodity, variety, and total are always visible
-          newSet.add('commodity');
+          // Ensure variety and total are always visible
+          // Only add commodity if there's more than one commodity
           newSet.add('variety');
           newSet.add('total');
+          if (uniqueCommoditiesCount > 1) {
+            newSet.add('commodity');
+          }
           return newSet;
         });
       });
     }
-  }, [allBagSizes]);
+  }, [allBagSizes, uniqueCommoditiesCount]);
+
+  // Update commodity column visibility when commodity count changes
+  useEffect(() => {
+    // Use requestAnimationFrame to avoid cascading renders
+    requestAnimationFrame(() => {
+      setVisibleColumns((prev) => {
+        const newSet = new Set(prev);
+        if (uniqueCommoditiesCount > 1) {
+          // Show commodity column if there's more than one commodity
+          newSet.add('commodity');
+        } else {
+          // Hide commodity column if there's only one commodity
+          newSet.delete('commodity');
+        }
+        return newSet;
+      });
+    });
+  }, [uniqueCommoditiesCount]);
 
   // Get visible bag sizes in order
   const visibleBagSizes = useMemo(() => {
@@ -292,38 +325,66 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3 sm:pb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0">
           <div className="flex-1">
             <CardTitle className="text-lg sm:text-xl">Stock Summary</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
+            <CardDescription className="text-xs sm:text-sm mt-1 sm:mt-1.5">
               View stock quantities by current inventory, initial quantities, or outgoing
               quantities.
             </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" className="gap-2 self-start sm:self-auto">
-            <TrendingUp className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 self-start sm:self-auto h-8 sm:h-9 text-xs sm:text-sm"
+          >
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Custom Analytics</span>
             <span className="sm:hidden">Analytics</span>
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="mb-4">
-          <TabsList className="w-full sm:w-auto flex-wrap">
-            <TabsTrigger value="current" className="text-xs sm:text-sm">
-              Current ({overallTotals.current.toLocaleString()})
+          <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex h-9 sm:h-10">
+            <TabsTrigger value="current" className="text-[10px] sm:text-sm px-2 sm:px-3">
+              <span className="hidden sm:inline">
+                Current ({overallTotals.current.toLocaleString()})
+              </span>
+              <span className="sm:hidden">
+                <span className="block text-[10px] leading-tight">Current</span>
+                <span className="block text-[9px] text-muted-foreground">
+                  {overallTotals.current.toLocaleString()}
+                </span>
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="initial" className="text-xs sm:text-sm">
-              Initial ({overallTotals.initial.toLocaleString()})
+            <TabsTrigger value="initial" className="text-[10px] sm:text-sm px-2 sm:px-3">
+              <span className="hidden sm:inline">
+                Initial ({overallTotals.initial.toLocaleString()})
+              </span>
+              <span className="sm:hidden">
+                <span className="block text-[10px] leading-tight">Initial</span>
+                <span className="block text-[9px] text-muted-foreground">
+                  {overallTotals.initial.toLocaleString()}
+                </span>
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="outgoing" className="text-xs sm:text-sm">
-              Outgoing ({overallTotals.outgoing.toLocaleString()})
+            <TabsTrigger value="outgoing" className="text-[10px] sm:text-sm px-2 sm:px-3">
+              <span className="hidden sm:inline">
+                Outgoing ({overallTotals.outgoing.toLocaleString()})
+              </span>
+              <span className="sm:hidden">
+                <span className="block text-[10px] leading-tight">Outgoing</span>
+                <span className="block text-[9px] text-muted-foreground">
+                  {overallTotals.outgoing.toLocaleString()}
+                </span>
+              </span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <h3 className="font-semibold text-sm sm:text-base capitalize">
               {activeTab === 'current'
@@ -335,10 +396,14 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
             <div className="flex gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Settings2 className="h-4 w-4" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                  >
+                    <Settings2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Columns</span>
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -362,13 +427,17 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button variant="outline" size="sm" className="gap-2 self-start sm:self-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+              >
                 <span className="hidden sm:inline">Print Report</span>
                 <span className="sm:hidden">Print</span>
               </Button>
             </div>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed">
             Stock quantities by commodity, variety and size. Click on any cell with quantity to view
             detailed breakdown.
           </p>
@@ -378,30 +447,43 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
               <TableHeader>
                 <TableRow>
                   {visibleColumns.has('commodity') && (
-                    <TableHead className="min-w-[120px]">Commodity</TableHead>
+                    <TableHead className="min-w-[85px] sm:min-w-[120px] text-[11px] sm:text-sm pl-2 sm:pl-4">
+                      Commodity
+                    </TableHead>
                   )}
-                  <TableHead className="min-w-[120px]">Variety</TableHead>
+                  <TableHead className="min-w-[85px] sm:min-w-[120px] text-[11px] sm:text-sm pl-2 sm:pl-4">
+                    Variety
+                  </TableHead>
                   {visibleBagSizes.map((size) => (
-                    <TableHead key={size} className="text-center min-w-[100px]">
+                    <TableHead
+                      key={size}
+                      className="text-center min-w-[60px] sm:min-w-[100px] text-[11px] sm:text-sm px-1.5 sm:px-4"
+                    >
                       {size}
                     </TableHead>
                   ))}
-                  <TableHead className="text-center min-w-[80px]">Total</TableHead>
+                  <TableHead className="text-center min-w-[55px] sm:min-w-[80px] text-[11px] sm:text-sm px-1.5 sm:px-4 pr-2 sm:pr-4">
+                    Total
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tableRows.map((row, idx) => (
-                  <TableRow key={idx}>
+                  <TableRow key={idx} className="hover:bg-transparent">
                     {visibleColumns.has('commodity') && (
-                      <TableCell className="font-medium">{row.commodity}</TableCell>
+                      <TableCell className="font-medium text-[11px] sm:text-sm py-2 sm:py-3 pl-2 sm:pl-4">
+                        {row.commodity}
+                      </TableCell>
                     )}
-                    <TableCell className="font-medium">{row.variety}</TableCell>
+                    <TableCell className="font-medium text-[11px] sm:text-sm py-2 sm:py-3 pl-2 sm:pl-4">
+                      {row.variety}
+                    </TableCell>
                     {visibleBagSizes.map((size) => {
                       const value = (row[size] as number) || 0;
                       return (
                         <TableCell
                           key={size}
-                          className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                          className="text-center cursor-pointer hover:bg-muted hover:ring-1 hover:ring-primary/20 transition-all duration-150 text-[11px] sm:text-sm py-2 sm:py-3 px-1.5 sm:px-4"
                           onClick={() => handleCellClick(row.commodity, row.variety, size)}
                         >
                           {value > 0 ? (
@@ -413,7 +495,7 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                       );
                     })}
                     <TableCell
-                      className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="text-center cursor-pointer hover:bg-muted hover:ring-1 hover:ring-primary/20 transition-all duration-150 text-[11px] sm:text-sm py-2 sm:py-3 px-1.5 sm:px-4 pr-2 sm:pr-4"
                       onClick={() => handleCellClick(row.commodity, row.variety)}
                     >
                       {(row.total as number) > 0 ? (
@@ -424,19 +506,24 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="bg-muted/50">
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableCell
                     colSpan={visibleColumns.has('commodity') ? 2 : 1}
-                    className="font-semibold"
+                    className="font-semibold text-[11px] sm:text-sm py-2.5 sm:py-3 pl-2 sm:pl-4"
                   >
                     Bag Total
                   </TableCell>
                   {visibleBagSizes.map((size) => (
-                    <TableCell key={size} className="text-center font-semibold">
+                    <TableCell
+                      key={size}
+                      className="text-center font-semibold text-[11px] sm:text-sm py-2.5 sm:py-3 px-1.5 sm:px-4"
+                    >
                       {totals[size] || 0}
                     </TableCell>
                   ))}
-                  <TableCell className="text-center font-semibold">{totals.total}</TableCell>
+                  <TableCell className="text-center font-semibold text-[11px] sm:text-sm py-2.5 sm:py-3 px-1.5 sm:px-4 pr-2 sm:pr-4">
+                    {totals.total}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

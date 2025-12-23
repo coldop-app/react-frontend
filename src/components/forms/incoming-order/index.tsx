@@ -102,6 +102,11 @@ export default function IncomingOrderPage() {
     );
   }, [coldStorage?.preferences?.commodities, selectedCommodity]);
 
+  // Check if there's only one commodity available
+  const hasSingleCommodity = useMemo(() => {
+    return (coldStorage?.preferences?.commodities?.length ?? 0) === 1;
+  }, [coldStorage?.preferences?.commodities]);
+
   // Generate a stable ID for variety entries
   const generateVarietyId = useCallback(() => {
     const id = `variety-${varietyIdCounterRef.current}`;
@@ -226,6 +231,37 @@ export default function IncomingOrderPage() {
     },
     [coldStorage?.preferences?.commodities]
   );
+
+  // Auto-select the single commodity if there's only one
+  useEffect(() => {
+    if (hasSingleCommodity && !selectedCommodity) {
+      const singleCommodity = coldStorage?.preferences?.commodities?.[0]?.name;
+      if (singleCommodity) {
+        // Directly set the commodity and reset varieties
+        setSelectedCommodity(singleCommodity);
+        const newSizes =
+          coldStorage?.preferences?.commodities?.find((c) => c.name === singleCommodity)?.sizes ??
+          [];
+        setVarieties([
+          {
+            id: 'variety-0',
+            variety: '',
+            quantities: newSizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
+            customMarka: newSizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
+            locations: newSizes.reduce(
+              (acc, size) => ({
+                ...acc,
+                [size]: { chamber: '', floor: '', row: '' },
+              }),
+              {}
+            ),
+          },
+        ]);
+        varietyIdCounterRef.current = 1;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSingleCommodity, selectedCommodity]);
 
   // Handle Create Null Voucher confirmation
   const handleConfirmNullVoucher = useCallback(() => {
@@ -468,9 +504,6 @@ export default function IncomingOrderPage() {
                 name="Voucher"
               />
               <CardTitle className="text-2xl mt-2">Incoming Order</CardTitle>
-              <CardDescription className="text-base mt-1">
-                Farmer details, varieties, quantities and location information.
-              </CardDescription>
             </div>
 
             {/* Right side: Action */}
@@ -481,13 +514,13 @@ export default function IncomingOrderPage() {
         </CardHeader>
 
         <CardContent className="px-6 pb-6">
-          <div className={cn('space-y-8', isNullVoucher && 'pointer-events-none opacity-50')}>
-            <div className="space-y-4">
+          <div className={cn('space-y-10', isNullVoucher && 'pointer-events-none opacity-50')}>
+            <div className="space-y-6">
               <div>
                 <p className="text-sm text-muted-foreground mb-4">
                   Select or add a farmer to start creating an incoming order.
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <Label htmlFor="farmer-search" className="text-base font-medium">
                     Select Farmer
                   </Label>
@@ -500,11 +533,13 @@ export default function IncomingOrderPage() {
               </div>
             </div>
 
-            <CommoditySelector onSelect={handleCommodityChange} disabled={isNullVoucher} />
+            {!hasSingleCommodity && (
+              <CommoditySelector onSelect={handleCommodityChange} disabled={isNullVoucher} />
+            )}
             <DatePicker value={orderDate} onChange={setOrderDate} />
 
             {/* Varieties Section */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base font-medium">Varieties</Label>
@@ -524,7 +559,7 @@ export default function IncomingOrderPage() {
                   Add Variety
                 </Button>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {varieties.map((varietyData, index) => (
                   <VarietyEntry
                     key={varietyData.id}
@@ -568,21 +603,6 @@ export default function IncomingOrderPage() {
         </CardFooter>
       </Card>
 
-      {/* Display submitted data */}
-      {submittedData && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">Submitted Form Data</CardTitle>
-            <CardDescription>All the details you entered:</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <pre className="bg-muted p-4 rounded-md overflow-auto text-sm">
-              {JSON.stringify(submittedData, null, 2)}
-            </pre>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Summary Sheet */}
       <IncomingOrderSummarySheet
         open={summarySheetOpen}
@@ -594,6 +614,7 @@ export default function IncomingOrderPage() {
         grandTotal={grandTotal}
         sizes={sizes}
         isNullVoucher={isNullVoucher}
+        hasSingleCommodity={hasSingleCommodity}
         remarksRef={remarksRef}
         onSubmit={handleSubmit}
         isSubmitting={createIncomingOrderMutation.isPending}

@@ -40,6 +40,7 @@ interface SummarySheetProps {
   grandTotal: number;
   sizes: string[];
   isNullVoucher: boolean;
+  hasSingleCommodity?: boolean;
   remarksRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit: () => void;
   isSubmitting: boolean;
@@ -55,6 +56,7 @@ function IncomingOrderSummarySheetComponent({
   grandTotal,
   sizes,
   isNullVoucher,
+  hasSingleCommodity = false,
   remarksRef,
   onSubmit,
   isSubmitting,
@@ -203,8 +205,8 @@ function IncomingOrderSummarySheetComponent({
                   </div>
                 )}
 
-                {/* Commodity */}
-                {selectedCommodity && (
+                {/* Commodity - Only show if there are multiple commodities */}
+                {selectedCommodity && !hasSingleCommodity && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       Commodity

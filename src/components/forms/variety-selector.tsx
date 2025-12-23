@@ -29,7 +29,7 @@ export const VarietySelector = ({
   }, [varieties]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <Label htmlFor={id} className="text-base font-medium">
         Select Variety
       </Label>

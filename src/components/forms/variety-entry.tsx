@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { VarietySelector } from './variety-selector';
 import { QuantityInputSection } from './quantity-input';
 import { LocationInputSection } from './location-input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useEnterNavigation } from '@/hooks/use-enter-navigation';
@@ -35,7 +35,7 @@ interface VarietyEntryProps {
 }
 
 export const VarietyEntry: React.FC<VarietyEntryProps> = ({
-  index,
+  index: _index,
   varietyId,
   variety, // reserved for future controlled component use
   commodity,
@@ -72,16 +72,24 @@ export const VarietyEntry: React.FC<VarietyEntryProps> = ({
 
   return (
     <Card ref={containerRef} className="relative">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">Variety {index + 1}</CardTitle>
+      <CardHeader className="pb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <VarietySelector
+              key={`${varietyId}-${commodity || 'no-commodity'}`}
+              id={`variety-selector-${varietyId}`}
+              onSelect={handleVarietySelect}
+              disabled={disabled}
+              varieties={varieties}
+            />
+          </div>
           {canRemove && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={() => onRemove(varietyId)}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
               disabled={disabled}
             >
               <X className="h-4 w-4" />
@@ -90,19 +98,10 @@ export const VarietyEntry: React.FC<VarietyEntryProps> = ({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Variety Selector */}
-        <VarietySelector
-          key={`${varietyId}-${commodity || 'no-commodity'}`}
-          id={`variety-selector-${varietyId}`}
-          onSelect={handleVarietySelect}
-          disabled={disabled}
-          varieties={varieties}
-        />
-
+      <CardContent className="space-y-10">
         {/* Quantity Inputs */}
-        <div className="space-y-6">
-          <Label className="text-base font-medium mb-3 block">Enter Quantities</Label>
+        <div className="space-y-5">
+          <Label className="text-base font-medium mb-5 block">Enter Quantities</Label>
           <QuantityInputSection
             quantities={quantities}
             customMarka={customMarka}
@@ -119,13 +118,15 @@ export const VarietyEntry: React.FC<VarietyEntryProps> = ({
         </div>
 
         {/* Location Inputs */}
-        <div className="mt-16">
-          <Label className="text-base font-medium mb-3 block">Enter Locations</Label>
+        <div className="mt-12">
+          <Label className="text-base font-medium mb-5 block">Enter Locations</Label>
           <LocationInputSection
             locations={locations}
             onLocationChange={handleLocationChange}
             varietyId={varietyId}
             commodity={commodity}
+            sizes={sizes}
+            quantities={quantities}
             disabled={disabled}
             showApplyToAll
             inline

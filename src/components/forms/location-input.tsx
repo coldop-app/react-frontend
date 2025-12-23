@@ -14,6 +14,7 @@ interface LocationInputSectionProps {
   varietyId?: string;
   commodity?: string;
   sizes?: string[];
+  quantities?: Record<string, string>;
   disabled?: boolean;
   showApplyToAll?: boolean;
   containerRef?: React.RefObject<HTMLElement>;
@@ -34,6 +35,7 @@ export const LocationInputSection: React.FC<LocationInputSectionProps> = ({
   varietyId,
   commodity,
   sizes: externalSizes,
+  quantities,
   disabled = false,
   showApplyToAll = true,
   containerRef: externalContainerRef,
@@ -43,11 +45,20 @@ export const LocationInputSection: React.FC<LocationInputSectionProps> = ({
   const { coldStorage } = useStore();
 
   // Determine sizes based on commodity or external sizes
-  const sizes = useMemo(() => {
+  const allSizes = useMemo(() => {
     if (externalSizes) return externalSizes;
     if (!commodity) return [];
     return coldStorage?.preferences?.commodities?.find((c) => c.name === commodity)?.sizes ?? [];
   }, [coldStorage?.preferences?.commodities, commodity, externalSizes]);
+
+  // Filter sizes to only show those with quantities entered
+  const sizes = useMemo(() => {
+    if (!quantities) return allSizes;
+    return allSizes.filter((size) => {
+      const quantity = quantities[size];
+      return quantity && quantity.trim() !== '' && !isNaN(parseFloat(quantity));
+    });
+  }, [allSizes, quantities]);
 
   // Internal state for locations if uncontrolled
   const [internalLocationValues, setInternalLocationValues] = useState<
@@ -123,51 +134,57 @@ export const LocationInputSection: React.FC<LocationInputSectionProps> = ({
 
   const content = (
     <div className="space-y-6">
-      {sizes.map((size, index) => (
-        <div key={size} className="space-y-3">
-          <div className="flex items-center justify-between gap-4">
-            <Label className="text-base font-medium min-w-[80px]">{size}</Label>
-            <div className="flex items-center gap-3 flex-1 max-w-md">
-              <Input
-                id={index === 0 && isStandalone && !inline ? 'first-location-chamber' : undefined}
-                data-location-input="chamber"
-                data-size={size}
-                data-variety-id={varietyId}
-                placeholder="Chamber"
-                className="h-10 flex-1"
-                value={locationValues[size]?.chamber || ''}
-                onChange={(e) => handleInputChange(size, 'chamber', e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={disabled}
-              />
-              <Input
-                data-location-input="floor"
-                data-size={size}
-                data-variety-id={varietyId}
-                placeholder="Floor"
-                className="h-10 flex-1"
-                value={locationValues[size]?.floor || ''}
-                onChange={(e) => handleInputChange(size, 'floor', e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={disabled}
-              />
-              <Input
-                data-location-input="row"
-                data-size={size}
-                data-variety-id={varietyId}
-                placeholder="Row"
-                className="h-10 flex-1"
-                value={locationValues[size]?.row || ''}
-                onChange={(e) => handleInputChange(size, 'row', e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={disabled}
-              />
+      {sizes.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-4">
+          Enter quantities for bag sizes above to see location inputs
+        </p>
+      ) : (
+        sizes.map((size, index) => (
+          <div key={size} className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <Label className="text-base font-medium min-w-[80px]">{size}</Label>
+              <div className="flex items-center gap-3 flex-1 max-w-md">
+                <Input
+                  id={index === 0 && isStandalone && !inline ? 'first-location-chamber' : undefined}
+                  data-location-input="chamber"
+                  data-size={size}
+                  data-variety-id={varietyId}
+                  placeholder="Chamber"
+                  className="h-10 flex-1"
+                  value={locationValues[size]?.chamber || ''}
+                  onChange={(e) => handleInputChange(size, 'chamber', e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={disabled}
+                />
+                <Input
+                  data-location-input="floor"
+                  data-size={size}
+                  data-variety-id={varietyId}
+                  placeholder="Floor"
+                  className="h-10 flex-1"
+                  value={locationValues[size]?.floor || ''}
+                  onChange={(e) => handleInputChange(size, 'floor', e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={disabled}
+                />
+                <Input
+                  data-location-input="row"
+                  data-size={size}
+                  data-variety-id={varietyId}
+                  placeholder="Row"
+                  className="h-10 flex-1"
+                  value={locationValues[size]?.row || ''}
+                  onChange={(e) => handleInputChange(size, 'row', e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={disabled}
+                />
+              </div>
             </div>
-          </div>
 
-          {index < sizes.length - 1 && <Separator className="mt-2" />}
-        </div>
-      ))}
+            {index < sizes.length - 1 && <Separator className="mt-2" />}
+          </div>
+        ))
+      )}
     </div>
   );
 
