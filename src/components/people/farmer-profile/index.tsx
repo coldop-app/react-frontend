@@ -110,7 +110,12 @@ export default function FarmerProfilePage() {
               </div>
               <div>
                 <CardTitle className="text-2xl">{farmer.name}</CardTitle>
-                <CardDescription className="mt-1">Account #{farmer.accountNumber}</CardDescription>
+                <CardDescription className="mt-1">
+                  Account #
+                  {typeof farmer.accountNumber === 'number'
+                    ? farmer.accountNumber.toLocaleString()
+                    : farmer.accountNumber}
+                </CardDescription>
               </div>
             </div>
 

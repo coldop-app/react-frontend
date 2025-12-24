@@ -55,6 +55,11 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
     };
   });
 
+  // Calculate insights dynamically
+  const sortedVarieties = [...chartData].sort((a, b) => b.value - a.value);
+  const topVariety = sortedVarieties[0];
+  const top2VarietiesTotal = sortedVarieties.slice(0, 2).reduce((sum, v) => sum + v.value, 0);
+
   return (
     <Card>
       <CardHeader>
@@ -103,7 +108,7 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
               </div>
 
               <span className="whitespace-nowrap text-xs font-medium sm:text-sm">
-                {variety.bags} bags ({variety.value}%)
+                {variety.bags.toLocaleString()} bags ({variety.value}%)
               </span>
             </div>
           ))}
@@ -112,8 +117,15 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
         <Alert>
           <AlertTitle className="text-sm sm:text-base">Distribution Insights</AlertTitle>
           <AlertDescription className="space-y-1 text-xs sm:text-sm">
-            <div>• Himalini is the most stored variety at 87.7% of all inventory</div>
-            <div>• Top 2 varieties account for 100.0% of inventory</div>
+            {topVariety && (
+              <div>
+                • {topVariety.name} is the most stored variety at {topVariety.value.toFixed(1)}% of
+                all inventory
+              </div>
+            )}
+            {sortedVarieties.length >= 2 && (
+              <div>• Top 2 varieties account for {top2VarietiesTotal.toFixed(1)}% of inventory</div>
+            )}
           </AlertDescription>
         </Alert>
       </CardContent>

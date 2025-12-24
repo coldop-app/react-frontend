@@ -6,6 +6,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 
 interface FarmerData {
@@ -50,6 +51,12 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
     ...item,
     fill: chartColors[index % chartColors.length],
   }));
+
+  // Calculate insights
+  const sortedFarmers = [...data].sort((a, b) => b.bags - a.bags);
+  const topFarmer = sortedFarmers[0];
+  const top2FarmersTotal = sortedFarmers.slice(0, 2).reduce((sum, f) => sum + f.storageShare, 0);
+  const totalBags = data.reduce((sum, farmer) => sum + farmer.bags, 0);
 
   return (
     <Card>
@@ -109,13 +116,29 @@ export function TopFarmersChart({ data }: { data: FarmerData[] }) {
               <span className="text-xs sm:text-sm text-muted-foreground">Storage Share</span>
               <div className="text-right">
                 <div className="text-xl sm:text-2xl font-bold text-primary">
-                  {data[0]?.storageShare || 0}%
+                  {topFarmer?.storageShare.toFixed(1) || '0'}%
                 </div>
                 <div className="text-xs text-muted-foreground">of total inventory</div>
               </div>
             </div>
           </div>
         </div>
+
+        <Alert className="mt-4">
+          <AlertTitle className="text-sm sm:text-base">Farmer Distribution Insights</AlertTitle>
+          <AlertDescription className="space-y-1 text-xs sm:text-sm">
+            {topFarmer && (
+              <div>
+                • {topFarmer.name} is the top contributor with {topFarmer.storageShare.toFixed(1)}%
+                of total inventory ({topFarmer.bags.toLocaleString()} bags)
+              </div>
+            )}
+            {sortedFarmers.length >= 2 && (
+              <div>• Top 2 farmers account for {top2FarmersTotal.toFixed(1)}% of inventory</div>
+            )}
+            <div>• Total bags across top farmers: {totalBags.toLocaleString()}</div>
+          </AlertDescription>
+        </Alert>
       </CardContent>
     </Card>
   );

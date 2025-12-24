@@ -46,7 +46,7 @@ export function SummaryCards({ data }: { data: typeof analyticsData.inventorySta
       <SummaryCard
         icon={Package}
         title="Total Inventory"
-        value={data.total}
+        value={data.total.toLocaleString()}
         subtitle="Total bags stored"
         color="blue"
       />
@@ -54,14 +54,14 @@ export function SummaryCards({ data }: { data: typeof analyticsData.inventorySta
         icon={Sprout}
         title="Top Variety"
         value={data.topVariety.name}
-        subtitle={`${data.topVariety.count} bags stored • ${data.topVariety.percentage}% of total inventory`}
+        subtitle={`${data.topVariety.count.toLocaleString()} bags stored • ${data.topVariety.percentage}% of total inventory`}
         color="purple"
       />
       <SummaryCard
         icon={Box}
         title="Second Variety"
         value={data.secondVariety.name}
-        subtitle={`${data.secondVariety.count} bags • ${data.secondVariety.percentage}% of all varieties`}
+        subtitle={`${data.secondVariety.count.toLocaleString()} bags • ${data.secondVariety.percentage}% of all varieties`}
         color="pink"
       />
       <SummaryCard

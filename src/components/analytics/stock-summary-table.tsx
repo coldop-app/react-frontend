@@ -487,7 +487,9 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                           onClick={() => handleCellClick(row.commodity, row.variety, size)}
                         >
                           {value > 0 ? (
-                            <span className="text-primary font-medium">{value}</span>
+                            <span className="text-primary font-medium">
+                              {value.toLocaleString()}
+                            </span>
                           ) : (
                             '-'
                           )}
@@ -499,7 +501,9 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                       onClick={() => handleCellClick(row.commodity, row.variety)}
                     >
                       {(row.total as number) > 0 ? (
-                        <span className="text-primary font-medium">{row.total}</span>
+                        <span className="text-primary font-medium">
+                          {(row.total as number).toLocaleString()}
+                        </span>
                       ) : (
                         '-'
                       )}
@@ -518,11 +522,11 @@ export function StockSummaryTable({ data }: StockSummaryTableProps) {
                       key={size}
                       className="text-center font-semibold text-[11px] sm:text-sm py-2.5 sm:py-3 px-1.5 sm:px-4"
                     >
-                      {totals[size] || 0}
+                      {(totals[size] || 0).toLocaleString()}
                     </TableCell>
                   ))}
                   <TableCell className="text-center font-semibold text-[11px] sm:text-sm py-2.5 sm:py-3 px-1.5 sm:px-4 pr-2 sm:pr-4">
-                    {totals.total}
+                    {totals.total.toLocaleString()}
                   </TableCell>
                 </TableRow>
               </TableBody>

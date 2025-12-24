@@ -157,7 +157,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                       handleCellClick(row.variety, size, row[size] as number, idx, false)
                     }
                   >
-                    {row[size] as number}
+                    {(row[size] as number).toLocaleString()}
                   </TableCell>
                 ))}
                 <TableCell
@@ -166,7 +166,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                     handleCellClick(row.variety, 'total', row.total as number, idx, false)
                   }
                 >
-                  {row.total as number}
+                  {(row.total as number).toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}
@@ -186,7 +186,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                       handleCellClick('Total', size, totalsRow[0][size] as number, -1, true)
                     }
                   >
-                    {totalsRow[0][size] as number}
+                    {(totalsRow[0][size] as number).toLocaleString()}
                   </TableCell>
                 ))}
                 <TableCell
@@ -195,7 +195,7 @@ function StockSummaryTableContent({ data, bagSizes, orders, commodity, tabType }
                     handleCellClick('Total', 'total', totalsRow[0].total as number, -1, true)
                   }
                 >
-                  {totalsRow[0].total as number}
+                  {(totalsRow[0].total as number).toLocaleString()}
                 </TableCell>
               </TableRow>
             )}
@@ -300,8 +300,19 @@ function BreakdownDialog({ alertData, onClose, orders, commodity, tabType }: Bre
 
   return (
     <AlertDialog open={!!alertData} onOpenChange={onClose}>
-      <AlertDialogContent className="w-[95vw] max-w-3xl max-h-[85vh] flex flex-col p-0">
-        <AlertDialogHeader className="px-6 pt-6 pb-4 flex-shrink-0">
+      <AlertDialogContent
+        className="
+      w-[95vw]
+      max-w-3xl
+      h-[85vh]
+      flex
+      flex-col
+      p-0
+      overflow-hidden
+    "
+      >
+        {/* Header (Fixed) */}
+        <AlertDialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
           <AlertDialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-base sm:text-lg break-words">{getTitle()}</span>
             <span className="text-base sm:text-lg font-semibold text-primary whitespace-nowrap">
@@ -309,40 +320,48 @@ function BreakdownDialog({ alertData, onClose, orders, commodity, tabType }: Bre
             </span>
           </AlertDialogTitle>
         </AlertDialogHeader>
+
+        {/* Body (Scrollable) */}
         <AlertDialogDescription asChild>
-          <div className="flex-1 overflow-hidden flex flex-col px-6 pb-4">
+          <div className="flex-1 overflow-hidden px-6 py-4">
             {breakdownEntries.length === 0 ? (
-              <p className="text-muted-foreground py-4">No entries found for this selection.</p>
+              <p className="text-muted-foreground">No entries found for this selection.</p>
             ) : (
-              <div className="flex-1 overflow-auto -mx-2 px-2">
+              <div className="h-full overflow-y-auto -mx-2 px-2">
                 <div className="rounded-md border min-w-full">
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="whitespace-nowrap">Size</TableHead>
-                          <TableHead className="text-center whitespace-nowrap">Location</TableHead>
-                          <TableHead className="text-right whitespace-nowrap">Quantity</TableHead>
-                          <TableHead className="text-right whitespace-nowrap">
-                            Voucher Number
+                          <TableHead className="whitespace-nowrap px-2 sm:px-4">Size</TableHead>
+                          <TableHead className="text-center whitespace-nowrap px-2 sm:px-4">
+                            Location
+                          </TableHead>
+                          <TableHead className="text-right whitespace-nowrap px-2 sm:px-4">
+                            Quantity
+                          </TableHead>
+                          <TableHead className="text-right whitespace-nowrap px-2 sm:px-4">
+                            <span className="sm:hidden">V. No.</span>
+                            <span className="hidden sm:inline">Voucher Number</span>
                           </TableHead>
                         </TableRow>
                       </TableHeader>
+
                       <TableBody>
                         {breakdownEntries.map((entry, idx) => (
                           <TableRow
                             key={`${entry.voucherNumber}-${entry.location}-${entry.size}-${idx}`}
                           >
-                            <TableCell className="font-medium whitespace-nowrap">
+                            <TableCell className="font-medium whitespace-nowrap px-2 sm:px-4">
                               {entry.size}
                             </TableCell>
-                            <TableCell className="text-center whitespace-nowrap">
+                            <TableCell className="text-center whitespace-nowrap px-2 sm:px-4">
                               {entry.location}
                             </TableCell>
-                            <TableCell className="text-right text-primary font-semibold whitespace-nowrap">
+                            <TableCell className="text-right text-primary font-semibold whitespace-nowrap px-2 sm:px-4">
                               {entry.quantity.toLocaleString()}
                             </TableCell>
-                            <TableCell className="text-right whitespace-nowrap">
+                            <TableCell className="text-right whitespace-nowrap px-2 sm:px-4">
                               {entry.voucherNumber}
                             </TableCell>
                           </TableRow>
@@ -355,7 +374,9 @@ function BreakdownDialog({ alertData, onClose, orders, commodity, tabType }: Bre
             )}
           </div>
         </AlertDialogDescription>
-        <AlertDialogFooter className="px-6 pb-6 pt-4 flex-shrink-0">
+
+        {/* Footer (Fixed) */}
+        <AlertDialogFooter className="px-6 py-4 flex-shrink-0 border-t">
           <AlertDialogAction>OK</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

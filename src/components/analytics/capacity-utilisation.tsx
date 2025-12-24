@@ -18,7 +18,8 @@ export function CapacityUtilization({ data }: { data: CapacityData }) {
           <div className="flex justify-between text-xs sm:text-sm mb-1">
             <span>0%</span>
             <span className="font-medium text-center px-2">
-              {data.current} / {data.total.toLocaleString()} bags ({data.utilizationPercentage}%)
+              {data.current.toLocaleString()} / {data.total.toLocaleString()} bags (
+              {data.utilizationPercentage}%)
             </span>
             <span>100%</span>
           </div>
@@ -46,7 +47,9 @@ export function CapacityUtilization({ data }: { data: CapacityData }) {
           </Card>
           <Card>
             <CardContent className="text-center p-3 sm:p-4">
-              <div className="text-xl sm:text-2xl font-bold text-primary mb-1">{data.current}</div>
+              <div className="text-xl sm:text-2xl font-bold text-primary mb-1">
+                {data.current.toLocaleString()}
+              </div>
               <div className="text-xs sm:text-sm text-muted-foreground">Currently Stored</div>
             </CardContent>
           </Card>
