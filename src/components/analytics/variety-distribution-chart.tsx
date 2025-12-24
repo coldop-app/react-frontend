@@ -31,7 +31,6 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
     },
   } satisfies ChartConfig;
 
-  // Map data to use chart config colors
   const chartColors = [
     'var(--chart-1)',
     'var(--chart-2)',
@@ -41,15 +40,15 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
   ];
 
   const chartData = data.map((item, index) => {
-    // Extract color from item.color (which may have hsl() wrapper) or use chart colors
     let fillColor = item.color;
-    if (fillColor && fillColor.includes('hsl(var(--chart-')) {
-      // Extract the chart variable name
+
+    if (fillColor?.includes('hsl(var(--chart-')) {
       const match = fillColor.match(/--chart-(\d)/);
       if (match) {
         fillColor = `var(--chart-${match[1]})`;
       }
     }
+
     return {
       ...item,
       fill: fillColor || chartColors[index % chartColors.length],
@@ -64,43 +63,46 @@ export function VarietyDistributionChart({ data }: { data: VarietyData[] }) {
           Percentage breakdown by potato variety
         </CardDescription>
       </CardHeader>
+
       <CardContent>
-        <div className="flex items-center justify-center mb-4 sm:mb-6 px-2">
+        <div className="w-full">
           <ChartContainer
             config={chartConfig}
-            className="min-h-[180px] sm:min-h-[300px] w-full max-w-[200px] sm:max-w-[300px]"
+            className="mx-auto w-full max-w-[85%] aspect-square pb-2 sm:max-w-[75%] md:max-w-[65%] lg:max-w-[55%]"
           >
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={0}
-                outerRadius="60%"
-                paddingAngle={2}
+                outerRadius="80%"
+                paddingAngle={1}
                 dataKey="value"
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
+
               <ChartTooltip content={<ChartTooltipContent />} />
             </PieChart>
           </ChartContainer>
         </div>
 
-        <div className="space-y-3 mb-4 sm:mb-6">
-          <h3 className="font-semibold text-sm sm:text-base">Variety Distribution & Insights</h3>
+        <div className="mb-4 space-y-3 sm:mb-6">
+          <h3 className="text-sm font-semibold sm:text-base">Variety Distribution & Insights</h3>
+
           {chartData.map((variety, idx) => (
             <div key={idx} className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  className="h-3 w-3 flex-shrink-0 rounded-full"
                   style={{ backgroundColor: variety.fill }}
                 />
-                <span className="text-xs sm:text-sm truncate">{variety.name}</span>
+                <span className="truncate text-xs sm:text-sm">{variety.name}</span>
               </div>
-              <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
+
+              <span className="whitespace-nowrap text-xs font-medium sm:text-sm">
                 {variety.bags} bags ({variety.value}%)
               </span>
             </div>

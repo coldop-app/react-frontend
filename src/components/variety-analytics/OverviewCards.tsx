@@ -11,20 +11,7 @@ export function OverviewCards({ data }: OverviewCardsProps) {
   const totalQuantity = calculateTotalQuantity(data.farmers);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Commodity</p>
-            <div>
-              <Badge variant="secondary" className="text-base px-3 py-1">
-                {data.commodity}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-2">

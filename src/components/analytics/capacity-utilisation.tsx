@@ -35,7 +35,7 @@ export function CapacityUtilization({ data }: { data: CapacityData }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           <Card>
             <CardContent className="text-center p-3 sm:p-4">
               <div className="text-xl sm:text-2xl font-bold mb-1">
@@ -50,7 +50,7 @@ export function CapacityUtilization({ data }: { data: CapacityData }) {
               <div className="text-xs sm:text-sm text-muted-foreground">Currently Stored</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="col-span-2 sm:col-span-1">
             <CardContent className="text-center p-3 sm:p-4">
               <div className="text-xl sm:text-2xl font-bold text-primary mb-1">
                 {data.total.toLocaleString()}

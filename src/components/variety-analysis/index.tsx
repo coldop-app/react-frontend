@@ -113,8 +113,8 @@ export const VarietyAnalyticsPage = ({
   if (isLoading) {
     return (
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 min-h-screen">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {[...Array(2)].map((_, i) => (
             <Card key={i}>
               <CardContent className="p-6">
                 <Skeleton className="h-4 w-24 mb-3" />
@@ -190,24 +190,63 @@ export const VarietyAnalyticsPage = ({
       {/* Bag Size Tabs */}
       {availableBagSizes.length > 0 && (
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-2">
               <h3 className="text-sm font-medium">Filter by Bag Size</h3>
+
               <Tabs value={bagSize || 'all'} onValueChange={handleBagSizeChange} className="w-full">
-                <TabsList className="w-full sm:w-auto flex-wrap">
-                  <TabsTrigger value="all" className="text-xs sm:text-sm">
-                    All Sizes
-                    {data?.data && (
-                      <span className="ml-1">
-                        ({calculateTotalQuantity(data.data.farmers).toLocaleString()})
-                      </span>
-                    )}
+                <TabsList
+                  className="
+              w-full
+              flex
+              flex-wrap
+              gap-1.5
+              p-1
+              h-auto
+              justify-start
+              bg-muted/50
+            "
+                >
+                  {/* All Sizes */}
+                  <TabsTrigger
+                    value="all"
+                    className="
+                h-7
+                px-2.5
+                text-xs
+                rounded-md
+                font-normal
+                data-[state=active]:bg-background
+                data-[state=active]:shadow-sm
+                data-[state=active]:font-medium
+              "
+                  >
+                    All
                   </TabsTrigger>
+
+                  {/* Individual Bag Sizes */}
                   {availableBagSizes.map((size) => {
                     const total = bagSizeTotals.get(size) || 0;
+
                     return (
-                      <TabsTrigger key={size} value={size} className="text-xs sm:text-sm">
-                        {size} ({total.toLocaleString()})
+                      <TabsTrigger
+                        key={size}
+                        value={size}
+                        className="
+                    h-7
+                    px-2.5
+                    text-xs
+                    rounded-md
+                    font-normal
+                    data-[state=active]:bg-background
+                    data-[state=active]:shadow-sm
+                    data-[state=active]:font-medium
+                  "
+                      >
+                        {size}
+                        <span className="ml-1 text-muted-foreground">
+                          ({total.toLocaleString()})
+                        </span>
                       </TabsTrigger>
                     );
                   })}
