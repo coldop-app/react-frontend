@@ -33,22 +33,28 @@ export function VarietyDialog({
 }: VarietyDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle>{editingVariety ? 'Edit Variety' : 'Create New Variety'}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">
+            {editingVariety ? 'Edit Variety' : 'Create New Variety'}
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             {editingVariety
               ? `Edit the variety for ${selectedCommodity} commodity.`
               : `Add a new variety to ${selectedCommodity} commodity.`}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-2 sm:py-4">
           <div className="space-y-2">
-            <Label htmlFor="commodity">Commodity</Label>
+            <Label htmlFor="commodity" className="text-sm">
+              Commodity
+            </Label>
             <Input id="commodity" value={selectedCommodity} disabled className="bg-muted" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="variety">Variety Name</Label>
+            <Label htmlFor="variety" className="text-sm">
+              Variety Name
+            </Label>
             <Input
               id="variety"
               placeholder="Enter variety name"
@@ -62,11 +68,19 @@ export function VarietyDialog({
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            className="w-full sm:w-auto order-2 sm:order-1"
+          >
             Cancel
           </Button>
-          <Button onClick={onSave} disabled={!varietyName.trim()}>
+          <Button
+            onClick={onSave}
+            disabled={!varietyName.trim()}
+            className="w-full sm:w-auto order-1 sm:order-2"
+          >
             {editingVariety ? 'Save Changes' : 'Create Variety'}
           </Button>
         </DialogFooter>

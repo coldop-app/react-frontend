@@ -1,7 +1,7 @@
 import { ArrowUp, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from '@tanstack/react-router';
-import { prefetchPreferencesById } from '@/services/base/preferences/usePreferencesById';
+import { prefetchPreferencesById } from '@/services/base/settings/preferences/usePreferencesById';
 import { prefetchAllFarmers } from '@/services/base/store-admin/functions/useGetAllFarmers';
 
 interface ActionButtonsProps {

@@ -150,16 +150,23 @@ const AppSidebar = () => {
                       >
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
+                            asChild
                             isActive={item.isActive}
                             variant="coldop-variant"
                             tooltip={item.name}
                             className="flex justify-between w-full"
+                            onClick={() => item.setOpen(true)}
                           >
-                            <div className="flex items-center gap-2">
-                              <Icon className="h-4 w-4" />
-                              <span>{item.name}</span>
-                            </div>
-                            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            <Link
+                              to={item.href}
+                              className="flex items-center justify-between w-full"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Icon className="h-4 w-4" />
+                                <span>{item.name}</span>
+                              </div>
+                              <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </Link>
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
 

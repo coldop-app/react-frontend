@@ -25,32 +25,34 @@ export function SortableTableRow({ id, index, variety, onEdit, onDelete }: Sorta
 
   return (
     <TableRow ref={setNodeRef} style={style}>
-      <TableCell className="text-muted-foreground">
-        <div className="flex items-center gap-2">
+      <TableCell className="text-muted-foreground text-xs sm:text-sm">
+        <div className="flex items-center gap-1 sm:gap-2">
           <div
             {...attributes}
             {...listeners}
             className="cursor-grab active:cursor-grabbing touch-none"
           >
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
+            <GripVertical className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
           {index + 1}
         </div>
       </TableCell>
-      <TableCell className="font-medium">{variety}</TableCell>
+      <TableCell className="font-medium text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none">
+        {variety}
+      </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 w-8 p-0">
-            <Pencil className="h-4 w-4" />
+        <div className="flex items-center justify-end gap-1 sm:gap-2">
+          <Button variant="ghost" size="sm" onClick={onEdit} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+            <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="sr-only">Edit</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive"
             onClick={onDelete}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="sr-only">Delete</span>
           </Button>
         </div>

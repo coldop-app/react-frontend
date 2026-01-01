@@ -23,20 +23,29 @@ export function CommodityTabItem({ commodity, onEdit, onDelete }: CommodityTabIt
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-1">
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none">
-        <GripVertical className="h-3 w-3 text-muted-foreground" />
+    <div ref={setNodeRef} style={style} className="flex items-center gap-1 min-w-0">
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+      >
+        <GripVertical className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
       </div>
-      <TabsTrigger value={commodity.name}>{commodity.name}</TabsTrigger>
-      <div className="flex items-center gap-1 ml-1">
-        <Button variant="ghost" size="icon-sm" onClick={onEdit} className="h-6 w-6">
+      <TabsTrigger
+        value={commodity.name}
+        className="text-xs sm:text-sm px-2 sm:px-3 truncate max-w-[120px] sm:max-w-none"
+      >
+        {commodity.name}
+      </TabsTrigger>
+      <div className="flex items-center gap-0.5 sm:gap-1 ml-0.5 sm:ml-1 flex-shrink-0">
+        <Button variant="ghost" size="icon-sm" onClick={onEdit} className="h-6 w-6 sm:h-7 sm:w-7">
           <Pencil className="h-3 w-3" />
         </Button>
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onDelete}
-          className="h-6 w-6 text-destructive hover:text-destructive"
+          className="h-6 w-6 sm:h-7 sm:w-7 text-destructive hover:text-destructive"
         >
           <Trash2 className="h-3 w-3" />
         </Button>

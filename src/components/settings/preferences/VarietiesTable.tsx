@@ -22,37 +22,43 @@ export function VarietiesTable({
 }: VarietiesTableProps) {
   if (varieties.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-muted-foreground border rounded-md">
+      <div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-muted-foreground border rounded-md">
         No varieties configured. Click "Add Variety" to create one.
       </div>
     );
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <SortableContext items={varieties} strategy={verticalListSortingStrategy}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">#</TableHead>
-              <TableHead>Variety Name</TableHead>
-              <TableHead className="text-right w-[150px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {varieties.map((variety, index) => (
-              <SortableTableRow
-                key={variety}
-                id={variety}
-                index={index}
-                variety={variety}
-                onEdit={() => onEdit(variety)}
-                onDelete={() => onDelete(variety)}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </SortableContext>
-    </DndContext>
+    <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <div className="inline-block min-w-full px-4 sm:px-0">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={varieties} strategy={verticalListSortingStrategy}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[40px] sm:w-[50px] text-xs sm:text-sm">#</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Variety Name</TableHead>
+                  <TableHead className="text-right w-[120px] sm:w-[150px] text-xs sm:text-sm">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {varieties.map((variety, index) => (
+                  <SortableTableRow
+                    key={variety}
+                    id={variety}
+                    index={index}
+                    variety={variety}
+                    onEdit={() => onEdit(variety)}
+                    onDelete={() => onDelete(variety)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </SortableContext>
+        </DndContext>
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,20 @@
 /**
+ * Commodity options
+ */
+export const Commodity = {
+  POTATO: 'POTATO',
+  ONION: 'ONION',
+  GARLIC: 'GARLIC',
+  TOMATO: 'TOMATO',
+  CARROT: 'CARROT',
+  APPLE: 'APPLE',
+  SWEETS: 'SWEETS',
+  OTHER: 'OTHER',
+} as const;
+
+export type CommodityType = (typeof Commodity)[keyof typeof Commodity];
+
+/**
  * Preferences API Response (includes timestamps)
  */
 export interface PreferencesApiResponse {

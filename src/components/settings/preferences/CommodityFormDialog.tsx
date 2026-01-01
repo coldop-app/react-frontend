@@ -12,8 +12,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { SortableItem } from '@/components/ui/sortable-item';
+import { Commodity, type CommodityType } from '@/types/settings/preferences';
 
 interface CommodityFormData {
   name: string;
@@ -68,34 +76,82 @@ export function CommodityFormDialog({
 }: CommodityFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle>{editingCommodity ? 'Edit Commodity' : 'Create New Commodity'}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">
+            {editingCommodity ? 'Edit Commodity' : 'Create New Commodity'}
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             {editingCommodity
               ? 'Edit the commodity details, bag sizes, and varieties.'
               : 'Create a new commodity with bag sizes and varieties.'}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
+
+        <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
           {/* Commodity Name */}
           <div className="space-y-2">
             <Label htmlFor="commodity-name">Commodity Name</Label>
-            <Input
-              id="commodity-name"
-              placeholder="Enter commodity name"
-              value={commodityForm.name}
-              onChange={(e) => onFormChange({ ...commodityForm, name: e.target.value })}
-            />
+            <Select
+              value={
+                Object.values(Commodity).includes(commodityForm.name as CommodityType)
+                  ? commodityForm.name
+                  : Commodity.OTHER
+              }
+              onValueChange={(value) => {
+                if (value === Commodity.OTHER) {
+                  // When OTHER is selected, clear the name to allow custom input
+                  onFormChange({
+                    ...commodityForm,
+                    name: '',
+                  });
+                } else {
+                  // When a specific commodity is selected, set it as the name
+                  onFormChange({
+                    ...commodityForm,
+                    name: value,
+                  });
+                }
+              }}
+            >
+              <SelectTrigger id="commodity-name" className="w-full">
+                <SelectValue placeholder="Select a commodity" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(Commodity).map((commodity) => (
+                  <SelectItem key={commodity} value={commodity}>
+                    {commodity}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(!commodityForm.name ||
+              !Object.values(Commodity).includes(commodityForm.name as CommodityType)) && (
+              <Input
+                placeholder="Enter custom commodity name"
+                value={
+                  Object.values(Commodity).includes(commodityForm.name as CommodityType)
+                    ? ''
+                    : commodityForm.name
+                }
+                onChange={(e) =>
+                  onFormChange({
+                    ...commodityForm,
+                    name: e.target.value.toUpperCase(),
+                  })
+                }
+                className="uppercase mt-2"
+              />
+            )}
           </div>
 
           <Separator />
 
           {/* Bag Sizes Section */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Bag Sizes</Label>
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <Label className="text-sm">Bag Sizes</Label>
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Input
                   placeholder="Enter bag size"
                   value={bagSizeName}
@@ -105,13 +161,14 @@ export function CommodityFormDialog({
                       onAddBagSize();
                     }
                   }}
-                  className="w-40"
+                  className="flex-1 sm:w-40"
                 />
                 <Button onClick={onAddBagSize} size="sm" disabled={!bagSizeName.trim()}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+
             {commodityForm.sizes.length > 0 ? (
               <DndContext
                 sensors={sensors}
@@ -131,7 +188,7 @@ export function CommodityFormDialog({
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => onRemoveBagSize(size)}
-                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          className="h-7 w-7 text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -151,9 +208,9 @@ export function CommodityFormDialog({
 
           {/* Varieties Section */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Varieties</Label>
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <Label className="text-sm">Varieties</Label>
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Input
                   placeholder="Enter variety name"
                   value={varietyName}
@@ -163,13 +220,14 @@ export function CommodityFormDialog({
                       onAddVariety();
                     }
                   }}
-                  className="w-40"
+                  className="flex-1 sm:w-40"
                 />
                 <Button onClick={onAddVariety} size="sm" disabled={!varietyName.trim()}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+
             {commodityForm.varieties.length > 0 ? (
               <DndContext
                 sensors={sensors}
@@ -192,7 +250,7 @@ export function CommodityFormDialog({
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => onRemoveVariety(variety)}
-                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          className="h-7 w-7 text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -208,11 +266,16 @@ export function CommodityFormDialog({
             )}
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={onSave} disabled={!commodityForm.name.trim()}>
+          <Button
+            onClick={onSave}
+            disabled={!commodityForm.name.trim()}
+            className="w-full sm:w-auto"
+          >
             {editingCommodity ? 'Save Changes' : 'Create Commodity'}
           </Button>
         </DialogFooter>

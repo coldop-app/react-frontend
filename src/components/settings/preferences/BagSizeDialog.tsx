@@ -33,22 +33,28 @@ export function BagSizeDialog({
 }: BagSizeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle>{editingBagSize ? 'Edit Bag Size' : 'Create New Bag Size'}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">
+            {editingBagSize ? 'Edit Bag Size' : 'Create New Bag Size'}
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             {editingBagSize
               ? `Edit the bag size for ${selectedCommodity} commodity.`
               : `Add a new bag size to ${selectedCommodity} commodity.`}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-2 sm:py-4">
           <div className="space-y-2">
-            <Label htmlFor="commodity-bag">Commodity</Label>
+            <Label htmlFor="commodity-bag" className="text-sm">
+              Commodity
+            </Label>
             <Input id="commodity-bag" value={selectedCommodity} disabled className="bg-muted" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bag-size">Bag Size</Label>
+            <Label htmlFor="bag-size" className="text-sm">
+              Bag Size
+            </Label>
             <Input
               id="bag-size"
               placeholder="Enter bag size"
@@ -62,11 +68,19 @@ export function BagSizeDialog({
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            className="w-full sm:w-auto order-2 sm:order-1"
+          >
             Cancel
           </Button>
-          <Button onClick={onSave} disabled={!bagSizeName.trim()}>
+          <Button
+            onClick={onSave}
+            disabled={!bagSizeName.trim()}
+            className="w-full sm:w-auto order-1 sm:order-2"
+          >
             {editingBagSize ? 'Save Changes' : 'Create Bag Size'}
           </Button>
         </DialogFooter>

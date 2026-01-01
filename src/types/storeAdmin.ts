@@ -35,3 +35,11 @@ export interface StoreAdminLoginErrorResponse {
 }
 
 export type StoreAdminLoginApiResponse = StoreAdminLoginResponse | StoreAdminLoginErrorResponse;
+
+/**
+ * Profile Settings API Response
+ */
+export interface ProfileSettingsApiResponse {
+  success: boolean;
+  data: StoreAdmin;
+}

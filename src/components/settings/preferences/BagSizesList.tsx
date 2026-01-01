@@ -24,7 +24,7 @@ export function BagSizesList({
 }: BagSizesListProps) {
   if (sizes.length === 0) {
     return (
-      <div className="text-center py-4 text-sm text-muted-foreground border rounded-md">
+      <div className="text-center py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground border rounded-md">
         No bag sizes configured. Click "Add Bag Size" to create one.
       </div>
     );
@@ -36,16 +36,16 @@ export function BagSizesList({
         <div className="space-y-2">
           {sizes.map((size, index) => (
             <SortableItem key={size} id={size}>
-              <div className="flex items-center gap-2 p-2 border rounded-md hover:bg-accent/50 flex-1">
-                <Badge variant="outline" className="flex-1 text-xs justify-start">
+              <div className="flex items-center gap-2 p-2 sm:p-2.5 border rounded-md hover:bg-accent/50 flex-1 min-w-0">
+                <Badge variant="outline" className="flex-1 text-xs justify-start truncate min-w-0">
                   {size}
                 </Badge>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => onEdit(size, index)}
-                    className="h-7 w-7"
+                    className="h-7 w-7 sm:h-8 sm:w-8"
                   >
                     <Pencil className="h-3 w-3" />
                   </Button>
@@ -53,7 +53,7 @@ export function BagSizesList({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => onDelete(size)}
-                    className="h-7 w-7 text-destructive hover:text-destructive"
+                    className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

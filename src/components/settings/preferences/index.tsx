@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '@/stores/store';
-import { usePreferences } from '@/services/base/settings/usePreferences';
-import { useUpdatePreferences } from '@/services/base/settings/useUpdatePreferences';
+import { usePreferences } from '@/services/base/settings/preferences/usePreferences';
+import { useUpdatePreferences } from '@/services/base/settings/preferences/useUpdatePreferences';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -561,12 +561,12 @@ export const PreferencesSettingsPage = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="p-4 md:p-6 space-y-6 min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-96" />
+          <Skeleton className="h-7 sm:h-8 w-48 sm:w-64" />
+          <Skeleton className="h-4 w-full sm:w-96" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card>
             <CardHeader>
               <Skeleton className="h-6 w-32" />
@@ -597,9 +597,9 @@ export const PreferencesSettingsPage = () => {
   // Error state
   if (isError || !preferencesId) {
     return (
-      <div className="p-4 md:p-6 min-h-screen flex items-center justify-center">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-6 text-center space-y-4">
+      <div className="p-4 sm:p-6 lg:p-8 min-h-screen flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="p-4 sm:p-6 text-center space-y-4">
             <div className="flex justify-center">
               <div className="rounded-full bg-destructive/10 p-3">
                 <AlertCircle className="h-6 w-6 text-destructive" />
@@ -630,8 +630,8 @@ export const PreferencesSettingsPage = () => {
 
   if (!preferencesData) {
     return (
-      <div className="p-4 md:p-6 min-h-screen flex items-center justify-center">
-        <Alert variant="destructive" className="max-w-md">
+      <div className="p-4 sm:p-6 lg:p-8 min-h-screen flex items-center justify-center">
+        <Alert variant="destructive" className="max-w-md mx-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No Data</AlertTitle>
           <AlertDescription>Preferences data is not available.</AlertDescription>
@@ -641,36 +641,41 @@ export const PreferencesSettingsPage = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6 min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Preferences</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Preferences</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             View and manage your cold storage preferences, varieties, and commodities.
           </p>
         </div>
-        <Button onClick={handleOpenCreateCommodityDialog} className="gap-2">
+        <Button
+          onClick={handleOpenCreateCommodityDialog}
+          className="gap-2 w-full sm:w-auto"
+          size="sm"
+        >
           <Plus className="h-4 w-4" />
-          Add Commodity
+          <span className="hidden sm:inline">Add Commodity</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
 
       {/* Commodities with Tabs */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-3 sm:pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <div className="flex items-center gap-2">
-              <Layers className="h-5 w-5 text-primary" />
-              <CardTitle>Commodities & Varieties</CardTitle>
+              <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <CardTitle className="text-lg sm:text-xl">Commodities & Varieties</CardTitle>
             </div>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               {preferencesData.commodities.length} commodit
               {preferencesData.commodities.length !== 1 ? 'ies' : 'y'} configured
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0 sm:pt-0">
           <CommodityTabs
             commodities={preferencesData.commodities}
             sensors={sensors}
