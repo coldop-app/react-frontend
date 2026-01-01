@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.10] - 2025-12-06
+
+### Added
+
+- Comprehensive profile settings page with full profile update functionality
+- Profile settings service hooks (useProfileSettings, useUpdateProfileSettings) with query key management
+- Profile update schema validation with Zod
+- Fonts route for font loading demonstration
+- Optimistic updates for profile settings with automatic rollback on errors
+- Store state synchronization - profile updates automatically sync with Zustand store
+
+### Changed
+
+- Refactored preferences services into dedicated preferences directory structure
+- Enhanced preferences components with improved structure and organization
+- Updated app sidebar and daybook action buttons
+- Improved route structure and type definitions
+
 ## [0.3.0-beta.9] - 2025-12-06
 
 ### Added
