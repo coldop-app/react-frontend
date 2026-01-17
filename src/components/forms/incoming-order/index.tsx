@@ -4,6 +4,7 @@ import { FarmerSearch, DatePicker } from '@/components/forms/index';
 import { formatDate, formatDateToISO } from '@/lib/helpers';
 import { VarietyEntry } from '@/components/forms/variety-entry';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { IncomingOrderSummarySheet } from './summary-sheet';
 import {
   Card,
@@ -72,6 +73,7 @@ export default function IncomingOrderPage() {
   const [selectedCommodity, setSelectedCommodity] = useState<string>('');
   const [farmerStorageLinkId, setFarmerStorageLinkId] = useState<string>('');
   const [orderDate, setOrderDate] = useState<string>(() => formatDate(new Date()));
+  const [storeCharge, setStoreCharge] = useState<string>('');
   const remarksRef = useRef<HTMLTextAreaElement>(null);
   const varietyIdCounterRef = useRef(1);
   const { coldStorage } = useStore();
@@ -299,6 +301,9 @@ export default function IncomingOrderPage() {
     // Reset date to today
     setOrderDate(formatDate(new Date()));
 
+    // Reset store charge
+    setStoreCharge('');
+
     // Set null voucher mode and open summary sheet
     setIsNullVoucher(true);
     setSummarySheetOpen(true);
@@ -320,6 +325,7 @@ export default function IncomingOrderPage() {
       farmerStorageLinkId,
       commodity: selectedCommodity as Commodity,
       remarks: remarks || null,
+      storeCharge: storeCharge && storeCharge.trim() !== '' ? storeCharge : undefined,
       varieties: isNullVoucher ? [] : varieties.filter((v) => v.variety), // Filter out empty varieties
     };
 
@@ -355,6 +361,10 @@ export default function IncomingOrderPage() {
       gatePassNumber,
       remarks: validationResult.data.remarks?.trim() || null,
       date: formatDateToISO(orderDate), // Convert dd.mm.yyyy to ISO format (2025-12-19T00:00:00.000Z)
+      ...(validationResult.data.storeCharge !== undefined &&
+      validationResult.data.storeCharge !== null
+        ? { storeCharge: validationResult.data.storeCharge }
+        : {}),
     };
 
     // For null voucher, varieties array is empty and gatePassType is optional
@@ -431,6 +441,7 @@ export default function IncomingOrderPage() {
         setSelectedCommodity('');
         setFarmerStorageLinkId('');
         setOrderDate(formatDate(new Date())); // Reset to today's date
+        setStoreCharge('');
         setIsNullVoucher(false);
         setSummarySheetOpen(false);
         if (remarksRef.current) {
@@ -449,6 +460,7 @@ export default function IncomingOrderPage() {
     sizes,
     createIncomingOrderMutation,
     orderDate,
+    storeCharge,
   ]);
 
   // Get farmer name from farmerStorageLinkId
@@ -590,6 +602,24 @@ export default function IncomingOrderPage() {
                 ))}
               </div>
             </div>
+
+            {/* Store Charge Field */}
+            <div className="space-y-4">
+              <Label htmlFor="store-charge" className="text-base font-medium">
+                Enter Rent
+              </Label>
+              <Input
+                id="store-charge"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Enter rent amount"
+                value={storeCharge}
+                onChange={(e) => setStoreCharge(e.target.value)}
+                disabled={isNullVoucher}
+                className="w-full"
+              />
+            </div>
           </div>
         </CardContent>
 
@@ -618,6 +648,7 @@ export default function IncomingOrderPage() {
         remarksRef={remarksRef}
         onSubmit={handleSubmit}
         isSubmitting={createIncomingOrderMutation.isPending}
+        storeCharge={storeCharge && storeCharge.trim() !== '' ? parseFloat(storeCharge) : undefined}
       />
 
       {/* Display submitted data */}

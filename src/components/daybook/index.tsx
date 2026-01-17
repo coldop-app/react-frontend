@@ -20,6 +20,7 @@ import {
 
 import ReceiptVoucherCard from '@/components/receipt-voucher-card';
 import DeliveryVoucherCard from '@/components/delivery-voucher-card';
+import { PaymentDialog } from './payment-dialog';
 
 export default function DaybookPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,6 +30,7 @@ export default function DaybookPage() {
   const [sortFilter, setSortFilter] = useState('Latest First');
   const [commodityFilter, setCommodityFilter] = useState('All Commodities');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
 
   const [isPending, startTransition] = useTransition();
 
@@ -136,6 +138,7 @@ export default function DaybookPage() {
         onOrderFilterChange={handleOrderFilterChange}
         onSortFilterChange={handleSortFilterChange}
         onCommodityFilterChange={handleCommodityFilterChange}
+        onAddPayment={() => setIsPaymentDialogOpen(true)}
       />
 
       {(isFetching || isPending) && !isLoading && (
@@ -309,6 +312,8 @@ export default function DaybookPage() {
           )}
         </>
       )}
+
+      <PaymentDialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen} />
     </div>
   );
 }

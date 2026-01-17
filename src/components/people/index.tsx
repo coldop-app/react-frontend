@@ -17,10 +17,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { User, Phone, MapPin, CheckCircle2, XCircle, Search, ChevronDown } from 'lucide-react';
+import {
+  User,
+  Phone,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  Search,
+  ChevronDown,
+  IndianRupee,
+  RefreshCw,
+} from 'lucide-react';
 
 const PeoplePage = () => {
-  const { data, isLoading, error } = useGetAllFarmers();
+  const { data, isLoading, error, refetch, isFetching } = useGetAllFarmers();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'Name' | 'Account Number'>('Name');
@@ -88,16 +98,28 @@ const PeoplePage = () => {
     <div className="p-4 space-y-6">
       {/* Header Section */}
       <div className="space-y-4">
-        {/* Farmers Count */}
+        {/* Farmers Count with Refresh */}
         <Card>
-          <CardContent className="flex items-center gap-3">
-            <div className="flex h-8 w-10 items-center justify-center rounded-lg bg-muted">
-              <div className="h-4 w-4 rounded-sm bg-primary"></div>
+          <CardContent className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-10 items-center justify-center rounded-lg bg-muted">
+                <div className="h-4 w-4 rounded-sm bg-primary"></div>
+              </div>
+              <div>
+                <span className="text-xl sm:text-2xl font-bold">{farmers.length}</span>
+                <span className="ml-2 text-sm sm:text-base">farmers</span>
+              </div>
             </div>
-            <div>
-              <span className="text-xl sm:text-2xl font-bold">{farmers.length}</span>
-              <span className="ml-2 text-sm sm:text-base">farmers</span>
-            </div>
+            <Button
+              onClick={() => refetch()}
+              variant="outline"
+              size="sm"
+              disabled={isFetching}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
           </CardContent>
         </Card>
 
@@ -169,6 +191,19 @@ interface FarmerCardProps {
 const FarmerCard = ({ farmer }: FarmerCardProps) => {
   const navigate = useNavigate();
 
+  // Calculate rent totals
+  const rentCalculations = useMemo(() => {
+    const paymentHistory = farmer.paymentHistory || [];
+    const totalRent = paymentHistory
+      .filter((entry) => entry.type === 'RENT')
+      .reduce((sum, entry) => sum + entry.amount, 0);
+    const rentPaid = paymentHistory
+      .filter((entry) => entry.type === 'PAYMENT')
+      .reduce((sum, entry) => sum + entry.amount, 0);
+    const remainingRent = totalRent - rentPaid;
+    return { totalRent, rentPaid, remainingRent };
+  }, [farmer.paymentHistory]);
+
   const handleClick = () => {
     navigate({
       to: '/store-admin/people/$farmerStorageLinkId',
@@ -218,6 +253,40 @@ const FarmerCard = ({ farmer }: FarmerCardProps) => {
               <MapPin className="h-4 w-4 mt-0.5" />
               {farmer.address}
             </div>
+
+            {/* Rent Information */}
+            {(rentCalculations.totalRent > 0 || rentCalculations.rentPaid > 0) && (
+              <div className="pt-3 border-t border-border space-y-2">
+                <div className="flex items-center gap-2 text-foreground font-medium">
+                  <IndianRupee className="h-4 w-4" />
+                  <span>Rent Summary</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <p className="text-muted-foreground">Total</p>
+                    <p className="font-semibold text-foreground">
+                      ₹{rentCalculations.totalRent.toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Paid</p>
+                    <p className="font-semibold text-green-600 dark:text-green-400">
+                      ₹{rentCalculations.rentPaid.toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Remaining</p>
+                    <p
+                      className={`font-semibold ${
+                        rentCalculations.remainingRent > 0 ? 'text-destructive' : 'text-foreground'
+                      }`}
+                    >
+                      ₹{rentCalculations.remainingRent.toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

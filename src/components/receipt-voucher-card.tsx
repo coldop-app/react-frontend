@@ -7,7 +7,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import type { DaybookOrder } from '@/types/daybook';
 import type { ColdStorage } from '@/types/coldStorage';
-import EditIncomingOrderDialog from '@/components/forms/edit-incoming-order';
+import { useNavigate } from '@tanstack/react-router';
 
 interface TableRow {
   variety: string;
@@ -88,7 +88,7 @@ function ReceiptVoucherCard({
   setReceiptColumns,
 }: ReceiptVoucherCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Memoize toggle handler
   const toggleExpanded = useCallback(() => {
@@ -276,7 +276,13 @@ function ReceiptVoucherCard({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsEditDialogOpen(true)}
+              onClick={() => {
+                navigate({
+                  to: '/store-admin/edit-incoming/$orderId',
+                  params: { orderId: data.id },
+                  state: { order: data },
+                });
+              }}
               aria-label="Edit voucher"
             >
               <Edit className="w-4 h-4 text-primary" />
@@ -366,17 +372,53 @@ function ReceiptVoucherCard({
               </section>
             </>
           )}
+
+          {/* Rent Entry */}
+          {data.rentEntry && (
+            <>
+              <Separator className="my-6 sm:my-8" />
+              <section>
+                <h3 className="font-bold text-base sm:text-lg mb-4 sm:mb-5 text-foreground">
+                  Rent Payment
+                </h3>
+                <div className="rounded-lg border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 dark:from-primary/20 dark:via-primary/10 dark:to-primary/20 p-5 sm:p-6 shadow-sm">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full shrink-0 mt-1" />
+                      <h4 className="font-semibold text-base sm:text-lg text-foreground">
+                        Store Charge
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Amount</p>
+                      <p className="text-xl sm:text-2xl font-bold text-primary">
+                        ₹{data.rentEntry.amount.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4 pt-4 border-t border-primary/20">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1.5">Payment Date</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {formatDate(data.rentEntry.date)}
+                      </p>
+                    </div>
+                    {data.rentEntry.remarks && (
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1.5">Remarks</p>
+                        <p className="text-sm text-foreground leading-relaxed">
+                          {data.rentEntry.remarks}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
         </CardContent>
       )}
-
-      {/* Edit Dialog */}
-      <EditIncomingOrderDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        order={data}
-      />
     </Card>
   );
 }
-
 export default memo(ReceiptVoucherCard);

@@ -82,6 +82,7 @@ export const incomingOrderFormSchema = z.object({
   farmerStorageLinkId: z.string().min(1, 'Please select a farmer'),
   commodity: commodityEnum,
   remarks: z.string().max(500, 'Remarks must be at most 500 characters').optional().nullable(),
+  storeCharge: z.coerce.number().min(0, 'Store charge must be non-negative').optional(),
   varieties: z
     .array(varietyEntrySchema)
     .min(1, 'At least one variety must be added')
@@ -103,6 +104,7 @@ export const nullVoucherFormSchema = z.object({
   farmerStorageLinkId: z.string().min(1, 'Please select a farmer'),
   commodity: commodityEnum,
   remarks: z.string().max(500, 'Remarks must be at most 500 characters').optional().nullable(),
+  storeCharge: z.coerce.number().min(0, 'Store charge must be non-negative').optional(),
   varieties: z.array(z.any()).length(0, 'Null vouchers must have no varieties'),
 });
 

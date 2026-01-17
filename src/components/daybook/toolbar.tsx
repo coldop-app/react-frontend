@@ -16,6 +16,7 @@ interface ToolbarProps {
   onOrderFilterChange: (filter: string) => void;
   onSortFilterChange: (filter: string) => void;
   onCommodityFilterChange: (filter: string) => void;
+  onAddPayment?: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -30,6 +31,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onOrderFilterChange,
   onSortFilterChange,
   onCommodityFilterChange,
+  onAddPayment,
 }) => {
   return (
     <div className="pb-8 space-y-4">
@@ -71,7 +73,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <ActionButtons preferencesId={preferencesId} />
+                <ActionButtons preferencesId={preferencesId} onAddPayment={onAddPayment} />
               </div>
             </div>
           </div>

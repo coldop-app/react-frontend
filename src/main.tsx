@@ -17,6 +17,7 @@ declare module '@tanstack/react-router' {
 
   interface HistoryState {
     farmer?: import('./services/base/store-admin/functions/useGetAllFarmers').StoreAdminFarmer;
+    order?: import('./types/daybook').DaybookOrder;
   }
 }
 

@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-beta.11] - 2025-01-18
+
+### Added
+
+- Payment history management system with comprehensive payment tracking
+- Payment dialog component for adding new payments (RENT, EXPENSE, PAYMENT types)
+- Payment history page with tabs (All, Payment, Expense) for filtering payments
+- Payment history summary cards showing Total Rent, Total Paid, Total Due, and Total Expense
+- Payment history card component displaying payment details with farmer information
+- Edit payment dialog for updating payment amounts, remarks, and voucher IDs
+- Payment history service hooks: `useGetPaymentHistory`, `useCreatePaymentHistory`, `useUpdatePaymentHistory`
+- Payment history query keys for efficient cache management
+- Payment history types and API response interfaces
+- "Add Payment" button in daybook toolbar for quick payment entry
+- "Payment History" navigation option in sidebar under Daybook section
+- Refresh button on people page matching analytics page functionality
+- HistoryState interface extended to support order data in navigation state
+
+### Changed
+
+- Updated daybook toolbar to include "Add Payment" action button
+- Enhanced app sidebar with payment history navigation link
+- Improved people page with refresh functionality for data updates
+- Updated farmer profile component with optional chaining for safer property access
+
+### Fixed
+
+- Fixed TypeScript errors in payment history components
+- Fixed unused import warnings in payment history and farmer profile components
+- Fixed navigation state type errors by extending HistoryState interface
+- Fixed optional chaining issues in farmer profile payment history calculations
+
 ## [0.3.0-beta.10] - 2025-12-06
 
 ### Added

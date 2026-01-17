@@ -7,6 +7,18 @@ import { useEffect } from 'react';
 import { queryClient } from '@/lib/queryClient';
 
 // ------------------ Types ------------------
+export interface PaymentHistoryEntry {
+  id: string;
+  date: string;
+  amount: number;
+  type: string;
+  remarks: string | null;
+  createdBy: string;
+  voucherId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface StoreAdminFarmer {
   id: string;
   farmerId: string;
@@ -15,6 +27,7 @@ export interface StoreAdminFarmer {
   address: string;
   accountNumber: number;
   isActive: boolean;
+  paymentHistory?: PaymentHistoryEntry[];
 }
 
 // ------------------ GET ALL FARMERS ------------------

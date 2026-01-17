@@ -44,6 +44,7 @@ interface SummarySheetProps {
   remarksRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit: () => void;
   isSubmitting: boolean;
+  storeCharge?: number | null;
 }
 
 function IncomingOrderSummarySheetComponent({
@@ -60,6 +61,7 @@ function IncomingOrderSummarySheetComponent({
   remarksRef,
   onSubmit,
   isSubmitting,
+  storeCharge,
 }: SummarySheetProps) {
   // Auto-focus on remarks field when sheet opens
   useEffect(() => {
@@ -277,6 +279,21 @@ function IncomingOrderSummarySheetComponent({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Store Charge / Rent */}
+          {storeCharge !== undefined && storeCharge !== null && storeCharge > 0 && (
+            <div className="rounded-lg border-2 border-primary/30 bg-primary/10 dark:bg-primary/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-foreground/90">Rent</p>
+                  <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full font-medium">
+                    Store Charge
+                  </span>
+                </div>
+                <p className="text-lg font-bold text-primary">{formatNumber(storeCharge)}</p>
+              </div>
             </div>
           )}
 

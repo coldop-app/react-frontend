@@ -27,6 +27,7 @@ export interface DaybookOrder {
   totalBags?: number; // present in outgoing
   totalWeight?: number; // present in outgoing
   createdBy?: CreatedBy; // present in outgoing
+  rentEntry?: RentEntry; // present in incoming when store charge is paid
 }
 
 export interface Pagination {
@@ -82,4 +83,19 @@ export interface BagSize {
 export interface CreatedBy {
   id: string;
   name: string;
+}
+
+/**
+ * Represents a rent entry associated with an incoming order
+ */
+export interface RentEntry {
+  id: string;
+  date: string; // ISO string
+  amount: number;
+  type: string; // e.g., "PAYMENT"
+  remarks: string | null;
+  createdBy: string;
+  voucherId: string;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }

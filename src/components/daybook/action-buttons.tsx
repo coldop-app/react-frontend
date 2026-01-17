@@ -6,9 +6,10 @@ import { prefetchAllFarmers } from '@/services/base/store-admin/functions/useGet
 
 interface ActionButtonsProps {
   preferencesId: string;
+  onAddPayment?: () => void;
 }
 
-export default function ActionButtons({ preferencesId }: ActionButtonsProps) {
+export default function ActionButtons({ preferencesId, onAddPayment }: ActionButtonsProps) {
   const navigate = useNavigate();
 
   const handlePrefetch = () => {
@@ -44,6 +45,12 @@ export default function ActionButtons({ preferencesId }: ActionButtonsProps) {
         <ArrowLeft className="h-4 w-4 shrink-0" />
         <span className="truncate">Add Outgoing</span>
       </Button>
+
+      {onAddPayment && (
+        <Button variant="outline" onClick={onAddPayment} className="flex items-center gap-1">
+          <span className="truncate">Add Payment</span>
+        </Button>
+      )}
     </div>
   );
 }

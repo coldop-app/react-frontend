@@ -12,6 +12,9 @@ import {
   ChevronDown,
   ChevronUp,
   Package,
+  IndianRupee,
+  Calendar,
+  FileText,
 } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetOrdersOfFarmer } from '@/services/base/store-admin/functions/useGetOrdersOfFarmer';
@@ -90,6 +93,43 @@ export default function FarmerProfilePage() {
       return sum + (summary.totals.current.total || 0);
     }, 0);
   }, [stockSummaries]);
+
+  // Calculate rent totals and prepare financial history
+  const rentCalculations = useMemo(() => {
+    const paymentHistory = farmer?.paymentHistory || [];
+    const totalRent = paymentHistory
+      .filter((entry) => entry.type === 'RENT')
+      .reduce((sum, entry) => sum + entry.amount, 0);
+    const rentPaid = paymentHistory
+      .filter((entry) => entry.type === 'PAYMENT')
+      .reduce((sum, entry) => sum + entry.amount, 0);
+    const remainingRent = totalRent - rentPaid;
+    return { totalRent, rentPaid, remainingRent };
+  }, [farmer?.paymentHistory]);
+
+  // Format date helper
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Sort payment history by date (latest first)
+  const sortedPaymentHistory = useMemo(() => {
+    const paymentHistory = farmer?.paymentHistory || [];
+    return [...paymentHistory].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Latest first
+    });
+  }, [farmer?.paymentHistory]);
 
   if (!farmer) {
     return (
@@ -194,6 +234,96 @@ export default function FarmerProfilePage() {
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">No orders found for this farmer.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Financial History */}
+      {farmer.paymentHistory && farmer.paymentHistory.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <IndianRupee className="h-5 w-5" />
+              Financial History
+            </CardTitle>
+            <CardDescription>Rent and payment transactions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Rent Summary */}
+            <div className="mb-6 p-4 rounded-lg border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 dark:from-primary/20 dark:via-primary/10 dark:to-primary/20">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Total Rent</p>
+                  <p className="text-lg font-bold text-foreground">
+                    ₹{rentCalculations.totalRent.toLocaleString('en-IN')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Rent Paid</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                    ₹{rentCalculations.rentPaid.toLocaleString('en-IN')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Remaining</p>
+                  <p
+                    className={`text-lg font-bold ${
+                      rentCalculations.remainingRent > 0 ? 'text-destructive' : 'text-foreground'
+                    }`}
+                  >
+                    ₹{rentCalculations.remainingRent.toLocaleString('en-IN')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment History List */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-base mb-3">Transaction History</h3>
+              {sortedPaymentHistory.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            entry.type === 'RENT'
+                              ? 'bg-destructive/10 text-destructive'
+                              : 'bg-green-500/10 text-green-600 dark:text-green-400'
+                          }`}
+                        >
+                          {entry.type}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDate(entry.date)}
+                        </div>
+                      </div>
+                      {entry.remarks && (
+                        <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                          <FileText className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                          <span>{entry.remarks}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`text-lg font-bold ${
+                          entry.type === 'RENT'
+                            ? 'text-destructive'
+                            : 'text-green-600 dark:text-green-400'
+                        }`}
+                      >
+                        {entry.type === 'RENT' ? '-' : '+'}₹{entry.amount.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

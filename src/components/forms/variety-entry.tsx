@@ -37,7 +37,7 @@ interface VarietyEntryProps {
 export const VarietyEntry: React.FC<VarietyEntryProps> = ({
   index: _index,
   varietyId,
-  variety, // reserved for future controlled component use
+  variety,
   commodity,
   sizes,
   showCustomMarka,
@@ -54,7 +54,6 @@ export const VarietyEntry: React.FC<VarietyEntryProps> = ({
   canRemove,
   disabled = false,
 }) => {
-  void variety; // suppress unused variable warning
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { onKeyDown } = useEnterNavigation({
@@ -81,6 +80,7 @@ export const VarietyEntry: React.FC<VarietyEntryProps> = ({
               onSelect={handleVarietySelect}
               disabled={disabled}
               varieties={varieties}
+              defaultValue={variety}
             />
           </div>
           {canRemove && (

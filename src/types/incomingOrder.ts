@@ -43,6 +43,7 @@ export interface CreateIncomingOrderInput {
   gatePassType?: string; // OPTIONAL (null voucher case)
   gatePassNumber: number;
   remarks?: string | null;
+  storeCharge?: number; // OPTIONAL - store charge/rent
   varieties?: IncomingOrderVariety[]; // OPTIONAL for null voucher case
   date?: string; // OPTIONAL - date in dd.mm.yyyy format
 }

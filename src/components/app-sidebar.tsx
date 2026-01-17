@@ -44,6 +44,7 @@ const navigationItems: NavigationItem[] = [
       { name: 'Overview', href: '/store-admin/daybook' },
       { name: 'Incoming', href: '/store-admin/incoming' },
       { name: 'Outgoing', href: '/store-admin/outgoing' },
+      { name: 'Payment History', href: '/store-admin/payment-history' },
     ],
   },
   {
@@ -93,6 +94,7 @@ const AppSidebar = () => {
     return (
       pathname.startsWith('/store-admin/incoming') ||
       pathname.startsWith('/store-admin/outgoing') ||
+      pathname.startsWith('/store-admin/payment-history') ||
       pathname === '/store-admin/daybook'
     );
   }, [pathname]);
