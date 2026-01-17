@@ -47,7 +47,7 @@ const PaymentHistoryPage = () => {
       totalDue,
       totalExpense,
     };
-  }, [data.data]);
+  }, [data]);
 
   // Filter payments based on active tab
   const filteredPayments = useMemo(() => {

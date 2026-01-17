@@ -43,7 +43,7 @@ export const PaymentHistoryCard: React.FC<PaymentHistoryCardProps> = ({ payment,
   const farmer = useMemo(() => {
     if (!farmersQuery.data?.data) return null;
     return farmersQuery.data.data.find((f) => f.id === payment.farmerStorageLinkId) ?? null;
-  }, [farmersQuery.data.data, payment.farmerStorageLinkId]);
+  }, [farmersQuery.data, payment.farmerStorageLinkId]);
 
   const formattedDate = useMemo(() => formatDate(payment.date), [payment.date]);
   const formattedAmount = useMemo(() => formatAmount(payment.amount), [payment.amount]);
