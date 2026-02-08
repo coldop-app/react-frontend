@@ -47,7 +47,7 @@ const ProfileSettingsPage = () => {
   const updateProfile = useUpdateProfileSettings();
 
   const form = useForm<ProfileUpdateInput>({
-    resolver: zodResolver(profileUpdateSchema),
+    resolver: zodResolver(profileUpdateSchema as never),
     mode: 'onChange',
     defaultValues: {
       coldStorageId: coldStorage?.id || admin?.coldStorageId || '',

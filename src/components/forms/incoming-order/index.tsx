@@ -32,11 +32,7 @@ import { Plus } from 'lucide-react';
 import { OrderNumber } from '@/components/forms/order-number';
 import { CommoditySelector } from '@/components/forms/commodity-selector';
 import { useGetGatePassNumber } from '@/services/base/incoming-orders/useGatePassNumber';
-import type {
-  Commodity,
-  CreateIncomingOrderInput,
-  IncomingOrderBagSize,
-} from '@/types/incomingOrder';
+import type { CreateIncomingOrderInput, IncomingOrderBagSize } from '@/types/incomingOrder';
 import { useCreateIncomingOrder } from '@/services/base/incoming-orders/useCreateIncomingOrder';
 import { toast } from 'sonner';
 import { useGetAllFarmers } from '@/services/base/store-admin/functions/useGetAllFarmers';
@@ -51,6 +47,8 @@ interface VarietyData {
   quantities: Record<string, string>;
   customMarka: Record<string, string>;
   locations: Record<string, { chamber: string; floor: string; row: string }>;
+  /** Price per bag (₹/bag) per size – only for sizes where quantity is entered */
+  pricePerBagSize: Record<string, string>;
 }
 
 interface SubmittedFormData {
@@ -78,7 +76,7 @@ export default function IncomingOrderPage() {
   const varietyIdCounterRef = useRef(1);
   const { coldStorage } = useStore();
 
-  const { data } = useGetGatePassNumber((selectedCommodity as Commodity) || undefined, 'incoming');
+  const { data } = useGetGatePassNumber(selectedCommodity || undefined, 'incoming');
   const createIncomingOrderMutation = useCreateIncomingOrder();
   const farmersQuery = useGetAllFarmers();
 
@@ -118,7 +116,6 @@ export default function IncomingOrderPage() {
 
   // State for managing multiple varieties
   const [varieties, setVarieties] = useState<VarietyData[]>(() => {
-    // Initialize with one empty variety entry using a stable ID
     return [
       {
         id: 'variety-0',
@@ -132,6 +129,7 @@ export default function IncomingOrderPage() {
           }),
           {}
         ),
+        pricePerBagSize: sizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
       },
     ];
   });
@@ -152,6 +150,7 @@ export default function IncomingOrderPage() {
           }),
           {}
         ),
+        pricePerBagSize: sizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
       },
     ]);
   }, [sizes, generateVarietyId]);
@@ -207,11 +206,19 @@ export default function IncomingOrderPage() {
     []
   );
 
+  // Update price per bag size for a specific variety and size
+  const handlePricePerBagSizeChange = useCallback((id: string, size: string, value: string) => {
+    setVarieties((prev) =>
+      prev.map((v) =>
+        v.id === id ? { ...v, pricePerBagSize: { ...v.pricePerBagSize, [size]: value } } : v
+      )
+    );
+  }, []);
+
   // Handle commodity selection and reset varieties
   const handleCommodityChange = useCallback(
     (commodity: string) => {
       setSelectedCommodity(commodity);
-      // Reset varieties when commodity changes
       const newSizes =
         coldStorage?.preferences?.commodities?.find((c) => c.name === commodity)?.sizes ?? [];
       setVarieties([
@@ -227,6 +234,7 @@ export default function IncomingOrderPage() {
             }),
             {}
           ),
+          pricePerBagSize: newSizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
         },
       ]);
       varietyIdCounterRef.current = 1;
@@ -257,6 +265,7 @@ export default function IncomingOrderPage() {
               }),
               {}
             ),
+            pricePerBagSize: newSizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
           },
         ]);
         varietyIdCounterRef.current = 1;
@@ -295,13 +304,12 @@ export default function IncomingOrderPage() {
           }),
           {}
         ),
+        pricePerBagSize: sizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
       },
     ]);
 
-    // Reset date to today
     setOrderDate(formatDate(new Date()));
 
-    // Reset store charge
     setStoreCharge('');
 
     // Set null voucher mode and open summary sheet
@@ -320,13 +328,19 @@ export default function IncomingOrderPage() {
     // Get remarks
     const remarks = remarksRef.current?.value || null;
 
-    // Prepare form data for validation
+    const storeChargeToValidate =
+      storeCharge && storeCharge.trim() !== ''
+        ? storeCharge
+        : totalRentAmount > 0
+          ? String(totalRentAmount)
+          : undefined;
+
     const formData = {
       farmerStorageLinkId,
-      commodity: selectedCommodity as Commodity,
+      commodity: selectedCommodity,
       remarks: remarks || null,
-      storeCharge: storeCharge && storeCharge.trim() !== '' ? storeCharge : undefined,
-      varieties: isNullVoucher ? [] : varieties.filter((v) => v.variety), // Filter out empty varieties
+      storeCharge: storeChargeToValidate,
+      varieties: isNullVoucher ? [] : varieties.filter((v) => v.variety),
     };
 
     // Validate using Zod schema
@@ -354,16 +368,21 @@ export default function IncomingOrderPage() {
       return;
     }
 
-    // Transform validated form data into API payload
+    const finalStoreCharge =
+      validationResult.data.storeCharge !== undefined && validationResult.data.storeCharge !== null
+        ? validationResult.data.storeCharge
+        : totalRentAmount > 0
+          ? totalRentAmount
+          : undefined;
+
     const payload: CreateIncomingOrderInput = {
       farmerStorageLinkId: validationResult.data.farmerStorageLinkId,
       commodity: validationResult.data.commodity,
       gatePassNumber,
       remarks: validationResult.data.remarks?.trim() || null,
-      date: formatDateToISO(orderDate), // Convert dd.mm.yyyy to ISO format (2025-12-19T00:00:00.000Z)
-      ...(validationResult.data.storeCharge !== undefined &&
-      validationResult.data.storeCharge !== null
-        ? { storeCharge: validationResult.data.storeCharge }
+      date: formatDateToISO(orderDate),
+      ...(finalStoreCharge !== undefined && finalStoreCharge !== null
+        ? { storeCharge: finalStoreCharge }
         : {}),
     };
 
@@ -436,6 +455,7 @@ export default function IncomingOrderPage() {
               }),
               {}
             ),
+            pricePerBagSize: sizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
           },
         ]);
         setSelectedCommodity('');
@@ -486,10 +506,27 @@ export default function IncomingOrderPage() {
       });
   }, [varieties, sizes]);
 
-  // Calculate grand total
+  // Calculate grand total (total bags)
   const grandTotal = useMemo(() => {
     return varietyTotals.reduce((sum, v) => sum + v.total, 0);
   }, [varietyTotals]);
+
+  // Total rent amount from per-variety price per bag size × quantities
+  const totalRentAmount = useMemo(() => {
+    let total = 0;
+    for (const v of varieties) {
+      if (!v.variety) continue;
+      for (const size of sizes) {
+        const qtyStr = v.quantities[size];
+        const qty = qtyStr && qtyStr.trim() !== '' ? parseFloat(qtyStr) : 0;
+        if (isNaN(qty) || qty <= 0) continue;
+        const priceStr = v.pricePerBagSize?.[size];
+        const price = priceStr && priceStr.trim() !== '' ? parseFloat(priceStr) : 0;
+        if (!isNaN(price) && price >= 0) total += qty * price;
+      }
+    }
+    return total;
+  }, [varieties, sizes]);
 
   // Auto-focus on first input when component mounts
   useEffect(() => {
@@ -587,11 +624,12 @@ export default function IncomingOrderPage() {
                     onQuantityChange={handleQuantityChange}
                     onCustomMarkaChange={handleCustomMarkaChange}
                     onLocationChange={handleLocationChange}
+                    onPricePerBagSizeChange={handlePricePerBagSizeChange}
                     quantities={varietyData.quantities}
                     customMarka={varietyData.customMarka}
                     locations={varietyData.locations}
+                    pricePerBagSize={varietyData.pricePerBagSize}
                     onLastFieldEnter={() => {
-                      // Open summary sheet when Enter is pressed on last field of last variety
                       if (index === varieties.length - 1) {
                         setSummarySheetOpen(true);
                       }
@@ -603,17 +641,35 @@ export default function IncomingOrderPage() {
               </div>
             </div>
 
-            {/* Store Charge Field */}
+            {/* Total amount (from per-variety price × quantities) */}
+            {totalRentAmount > 0 && !isNullVoucher && (
+              <div className="rounded-lg border-2 border-primary/30 bg-primary/10 dark:bg-primary/5 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground/90">
+                    Total amount (price × quantities per variety)
+                  </span>
+                  <span className="text-lg font-bold text-primary">
+                    ₹{totalRentAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Store Charge: optional manual override */}
             <div className="space-y-4">
               <Label htmlFor="store-charge" className="text-base font-medium">
-                Enter Rent
+                Enter Rent {totalRentAmount > 0 ? '(optional override)' : ''}
               </Label>
               <Input
                 id="store-charge"
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Enter rent amount"
+                placeholder={
+                  totalRentAmount > 0
+                    ? `Or override (computed: ₹${totalRentAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })})`
+                    : 'Enter rent amount'
+                }
                 value={storeCharge}
                 onChange={(e) => setStoreCharge(e.target.value)}
                 disabled={isNullVoucher}
@@ -648,7 +704,13 @@ export default function IncomingOrderPage() {
         remarksRef={remarksRef}
         onSubmit={handleSubmit}
         isSubmitting={createIncomingOrderMutation.isPending}
-        storeCharge={storeCharge && storeCharge.trim() !== '' ? parseFloat(storeCharge) : undefined}
+        storeCharge={
+          storeCharge && storeCharge.trim() !== ''
+            ? parseFloat(storeCharge)
+            : totalRentAmount > 0
+              ? totalRentAmount
+              : undefined
+        }
       />
 
       {/* Display submitted data */}

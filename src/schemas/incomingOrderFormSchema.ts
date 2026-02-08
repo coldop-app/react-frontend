@@ -1,16 +1,7 @@
 import { z } from 'zod';
 
-// Commodity enum validation
-export const commodityEnum = z.enum([
-  'POTATO',
-  'ONION',
-  'GARLIC',
-  'TOMATO',
-  'CARROT',
-  'APPLE',
-  'SWEETS',
-  'OTHER',
-]);
+// Commodity: free string (enum-free). Use POTATO, FRUIT, OTHER, or any custom name.
+export const commoditySchema = z.string().min(1, 'Commodity is required');
 
 // Location validation schema
 export const locationSchema = z.object({
@@ -80,7 +71,7 @@ export const varietyEntrySchema = z.object({
 // Main incoming order form schema for regular vouchers
 export const incomingOrderFormSchema = z.object({
   farmerStorageLinkId: z.string().min(1, 'Please select a farmer'),
-  commodity: commodityEnum,
+  commodity: commoditySchema,
   remarks: z.string().max(500, 'Remarks must be at most 500 characters').optional().nullable(),
   storeCharge: z.coerce.number().min(0, 'Store charge must be non-negative').optional(),
   varieties: z
@@ -102,7 +93,7 @@ export const incomingOrderFormSchema = z.object({
 // Schema for null voucher (varieties array is empty)
 export const nullVoucherFormSchema = z.object({
   farmerStorageLinkId: z.string().min(1, 'Please select a farmer'),
-  commodity: commodityEnum,
+  commodity: commoditySchema,
   remarks: z.string().max(500, 'Remarks must be at most 500 characters').optional().nullable(),
   storeCharge: z.coerce.number().min(0, 'Store charge must be non-negative').optional(),
   varieties: z.array(z.any()).length(0, 'Null vouchers must have no varieties'),

@@ -26,7 +26,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<StoreAdminLoginForm>({
-    resolver: zodResolver(storeAdminLoginSchema),
+    resolver: zodResolver(storeAdminLoginSchema as never),
     defaultValues: {
       mobileNumber: '',
       password: '',

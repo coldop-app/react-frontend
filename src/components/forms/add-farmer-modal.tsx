@@ -84,7 +84,7 @@ export const AddFarmerModal = ({ farmers = [] }: AddFarmerModalProps) => {
   }, [usedAccountNumbers, usedMobileNumbers]);
 
   const form = useForm<z.infer<typeof storeAdminFarmerRegisterSchema>>({
-    resolver: zodResolver(storeAdminFarmerRegisterSchema),
+    resolver: zodResolver(storeAdminFarmerRegisterSchema as never),
     mode: 'onChange',
     defaultValues: {
       name: '',

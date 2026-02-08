@@ -25,6 +25,7 @@ interface VarietyData {
   quantities: Record<string, string>;
   customMarka: Record<string, string>;
   locations: Record<string, { chamber: string; floor: string; row: string }>;
+  pricePerBagSize: Record<string, string>;
 }
 
 interface EditIncomingOrderPageProps {
@@ -120,6 +121,7 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
         quantities,
         customMarka,
         locations,
+        pricePerBagSize: commoditySizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
       };
     });
 
@@ -139,6 +141,7 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
                 }),
                 {}
               ),
+              pricePerBagSize: commoditySizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
             },
           ];
 
@@ -171,6 +174,7 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
           }),
           {}
         ),
+        pricePerBagSize: sizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
       },
     ]);
   }, [sizes, generateVarietyId]);
@@ -196,6 +200,7 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
                 }),
                 {}
               ),
+              pricePerBagSize: sizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
             },
           ];
         }
@@ -271,12 +276,21 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
             }),
             {}
           ),
+          pricePerBagSize: newSizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
         },
       ]);
       varietyIdCounterRef.current = 1;
     },
     [coldStorage?.preferences?.commodities]
   );
+
+  const handlePricePerBagSizeChange = useCallback((id: string, size: string, value: string) => {
+    setVarieties((prev) =>
+      prev.map((v) =>
+        v.id === id ? { ...v, pricePerBagSize: { ...v.pricePerBagSize, [size]: value } } : v
+      )
+    );
+  }, []);
 
   // Get farmer name from farmerStorageLinkId
   const selectedFarmer = useMemo(() => {
@@ -524,11 +538,12 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
                     onQuantityChange={handleQuantityChange}
                     onCustomMarkaChange={handleCustomMarkaChange}
                     onLocationChange={handleLocationChange}
+                    onPricePerBagSizeChange={handlePricePerBagSizeChange}
                     quantities={varietyData.quantities}
                     customMarka={varietyData.customMarka}
                     locations={varietyData.locations}
+                    pricePerBagSize={varietyData.pricePerBagSize}
                     onLastFieldEnter={() => {
-                      // Open summary sheet when Enter is pressed on last field of last variety
                       if (index === varieties.length - 1) {
                         setSummarySheetOpen(true);
                       }
