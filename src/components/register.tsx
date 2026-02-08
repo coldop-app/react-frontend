@@ -25,7 +25,7 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<StoreAdminRegisterForm>({
-    resolver: zodResolver(storeAdminRegisterSchema),
+    resolver: zodResolver(storeAdminRegisterSchema as never),
     defaultValues: {
       name: '',
       mobileNumber: '',

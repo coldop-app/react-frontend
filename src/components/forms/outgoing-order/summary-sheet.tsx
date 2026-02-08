@@ -45,6 +45,8 @@ interface SummarySheetProps {
   } | null;
   selectedCommodity: string;
   selectedVariety: string;
+  paymentMode: 'paid' | 'credit';
+  onPaymentModeChange: (mode: 'paid' | 'credit') => void;
   remarksRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit: () => void;
   isSubmitting: boolean;
@@ -57,6 +59,8 @@ function SummarySheetComponent({
   selectedFarmer,
   selectedCommodity,
   selectedVariety,
+  paymentMode,
+  onPaymentModeChange,
   remarksRef,
   onSubmit,
   isSubmitting,
@@ -297,6 +301,38 @@ function SummarySheetComponent({
             <p className="text-xs text-muted-foreground border-t pt-2">
               {selectedBags.length} unique bag(s) across {orderGroupsForRender.length} gate passes
             </p>
+          </div>
+
+          {/* Payment: Paid / Credit */}
+          <div className="space-y-3">
+            <p className="text-sm font-semibold">Payment</p>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="payment-mode"
+                  checked={paymentMode === 'paid'}
+                  onChange={() => onPaymentModeChange('paid')}
+                  className="h-4 w-4 text-primary"
+                />
+                <span className="text-sm">Paid</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="payment-mode"
+                  checked={paymentMode === 'credit'}
+                  onChange={() => onPaymentModeChange('credit')}
+                  className="h-4 w-4 text-primary"
+                />
+                <span className="text-sm">Credit</span>
+              </label>
+            </div>
+            {paymentMode === 'paid' && (
+              <p className="text-xs text-muted-foreground">
+                After submitting, Add Payment will open with RENT and this farmer pre-filled.
+              </p>
+            )}
           </div>
 
           {/* REMARKS */}

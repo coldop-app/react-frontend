@@ -2,19 +2,13 @@ export interface GatePassNumberResponse {
   success: boolean;
   data: {
     nextGatePassNumber: number;
-    commodity: Commodity;
+    commodity: string;
     coldStorageId: string;
   };
 }
-export type Commodity =
-  | 'POTATO'
-  | 'ONION'
-  | 'GARLIC'
-  | 'TOMATO'
-  | 'CARROT'
-  | 'APPLE'
-  | 'SWEETS'
-  | 'OTHER';
+
+/** Commodity: free string (enum-free), e.g. POTATO, FRUIT, OTHER, or any custom name */
+export type Commodity = string;
 
 // ==========================
 // Incoming Order Types

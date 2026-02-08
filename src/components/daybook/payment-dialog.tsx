@@ -62,12 +62,25 @@ const paymentFormSchema = z.object({
 
 type PaymentFormData = z.infer<typeof paymentFormSchema>;
 
+export interface PaymentDialogInitialData {
+  paymentType?: 'RENT' | 'EXPENSE' | 'PAYMENT';
+  farmerStorageLinkId?: string;
+  amount?: string;
+  date?: string;
+}
+
 interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When opening from outgoing voucher (Paid), prefill payment type RENT and farmer */
+  initialData?: PaymentDialogInitialData | null;
 }
 
-export const PaymentDialog: React.FC<PaymentDialogProps> = ({ open, onOpenChange }) => {
+export const PaymentDialog: React.FC<PaymentDialogProps> = ({
+  open,
+  onOpenChange,
+  initialData,
+}) => {
   const { admin } = useStore();
   const createPaymentHistoryMutation = useCreatePaymentHistory();
   const farmersQuery = useGetAllFarmers();
@@ -91,7 +104,7 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({ open, onOpenChange
   }, [farmersQuery.data]);
 
   const form = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentFormSchema),
+    resolver: zodResolver(paymentFormSchema as never),
     defaultValues: {
       paymentType: 'PAYMENT',
       farmerStorageLinkId: '',
@@ -137,18 +150,28 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({ open, onOpenChange
     onOpenChange(false);
   };
 
-  // Reset form to defaults when dialog opens
+  // Reset form when dialog opens: use initialData if provided (e.g. from outgoing voucher)
   React.useEffect(() => {
     if (open) {
-      form.reset({
-        paymentType: 'PAYMENT',
-        farmerStorageLinkId: '',
-        amount: '',
-        date: formatDate(new Date()),
-        remarks: '',
-      });
+      if (initialData && (initialData.paymentType || initialData.farmerStorageLinkId)) {
+        form.reset({
+          paymentType: initialData.paymentType ?? 'RENT',
+          farmerStorageLinkId: initialData.farmerStorageLinkId ?? '',
+          amount: initialData.amount ?? '',
+          date: initialData.date ?? formatDate(new Date()),
+          remarks: '',
+        });
+      } else {
+        form.reset({
+          paymentType: 'PAYMENT',
+          farmerStorageLinkId: '',
+          amount: '',
+          date: formatDate(new Date()),
+          remarks: '',
+        });
+      }
     }
-  }, [open, form]);
+  }, [open, form, initialData]);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

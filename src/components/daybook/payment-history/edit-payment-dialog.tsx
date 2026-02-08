@@ -57,7 +57,7 @@ export const EditPaymentDialog: React.FC<EditPaymentDialogProps> = ({
   const updatePaymentHistoryMutation = useUpdatePaymentHistory();
 
   const form = useForm<UpdatePaymentFormData>({
-    resolver: zodResolver(updatePaymentFormSchema),
+    resolver: zodResolver(updatePaymentFormSchema as never),
     defaultValues: {
       amount: payment.amount.toString(),
       remarks: payment.remarks || '',

@@ -14,6 +14,7 @@ import { useOutgoingOrder } from './useOutgoingOrder';
 import { StepInfo } from './step-info';
 import { QuantityDialog } from './quantity-dialog';
 import { SummarySheet } from './summary-sheet';
+import { PaymentDialog } from '@/components/daybook/payment-dialog';
 
 export default function OutgoingOrderPage() {
   const {
@@ -62,6 +63,12 @@ export default function OutgoingOrderPage() {
     handleQuantityRemove,
     handleQuickRemove,
     handleDialogClose,
+    paymentMode,
+    setPaymentMode,
+    paymentDialogOpen,
+    setPaymentDialogOpen,
+    paymentDialogInitialData,
+    setPaymentDialogInitialData,
   } = useOutgoingOrder();
 
   // Autofocus farmer search input on mount
@@ -151,9 +158,21 @@ export default function OutgoingOrderPage() {
         selectedFarmer={selectedFarmer}
         selectedCommodity={selectedCommodity}
         selectedVariety={selectedVariety}
+        paymentMode={paymentMode}
+        onPaymentModeChange={setPaymentMode}
         remarksRef={remarksRef}
         onSubmit={handleSubmit}
         isSubmitting={createOutgoingOrderMutation.isPending}
+      />
+
+      {/* Add Payment (opens after outgoing submit when Paid is selected) */}
+      <PaymentDialog
+        open={paymentDialogOpen}
+        onOpenChange={(open) => {
+          setPaymentDialogOpen(open);
+          if (!open) setPaymentDialogInitialData(null);
+        }}
+        initialData={paymentDialogInitialData}
       />
     </div>
   );

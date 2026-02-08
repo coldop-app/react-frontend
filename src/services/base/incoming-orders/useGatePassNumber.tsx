@@ -7,30 +7,21 @@ import { toast } from 'sonner';
 import { useRouterState } from '@tanstack/react-router';
 import storeAdminAxiosClient from '@/lib/axios';
 
-export type Commodity =
-  | 'POTATO'
-  | 'ONION'
-  | 'GARLIC'
-  | 'TOMATO'
-  | 'CARROT'
-  | 'APPLE'
-  | 'SWEETS'
-  | 'OTHER';
-
 export type GatePassType = 'incoming' | 'outgoing';
 
 export interface GatePassNumberResponse {
   success: boolean;
   data: {
     nextGatePassNumber: number;
-    commodity: Commodity;
+    commodity: string;
     coldStorageId: string;
     type: GatePassType;
   };
 }
 
+/** commodity: free string (enum-free), e.g. POTATO, FRUIT, OTHER, or any custom name */
 export const useGetGatePassNumber = (
-  commodity: Commodity | undefined,
+  commodity: string | undefined,
   type: GatePassType | undefined
 ) => {
   const router = useRouterState(); // 🔥 detect client-side route/tab changes

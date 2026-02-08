@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStore } from '@/stores/store';
-import type { Commodity } from '@/types/incomingOrder';
 import type { CreateOutgoingOrderInput } from '@/types/outgoingOrder';
 import { useGetGatePassNumber } from '@/services/base/incoming-orders/useGatePassNumber';
 import { useCreateOutgoingOrder } from '@/services/base/outgoing-orders/useCreateOutgoingOrder';
@@ -24,12 +23,20 @@ export function useOutgoingOrder() {
   const [maxQuantity, setMaxQuantity] = useState<number>(0);
   const [quantityError, setQuantityError] = useState<string>('');
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<'paid' | 'credit'>('credit');
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentDialogInitialData, setPaymentDialogInitialData] = useState<{
+    paymentType: 'RENT' | 'PAYMENT' | 'EXPENSE';
+    farmerStorageLinkId: string;
+    amount?: string;
+    date?: string;
+  } | null>(null);
   const [orderDate, setOrderDate] = useState<string>(() => formatDate(new Date()));
   const remarksRef = useRef<HTMLTextAreaElement>(null);
   const autoSelectedCommodityRef = useRef<string>('');
   const { coldStorage } = useStore();
 
-  const { data } = useGetGatePassNumber((selectedCommodity as Commodity) || undefined, 'outgoing');
+  const { data } = useGetGatePassNumber(selectedCommodity || undefined, 'outgoing');
   const createOutgoingOrderMutation = useCreateOutgoingOrder();
   const farmersQuery = useGetAllFarmers();
   const farmerOrdersQuery = useGetOrdersOfFarmer({
@@ -532,7 +539,7 @@ export function useOutgoingOrder() {
 
     const payload: CreateOutgoingOrderInput = {
       farmerStorageLinkId,
-      commodity: selectedCommodity as Commodity,
+      commodity: selectedCommodity,
       gatePassNumber,
       gatePassType: 'DELIVERY',
       remarks: remarks?.trim() || null,
@@ -542,16 +549,25 @@ export function useOutgoingOrder() {
 
     createOutgoingOrderMutation.mutate(payload, {
       onSuccess: () => {
+        setSummarySheetOpen(false);
         setSelectedCommodity('');
-        setFarmerStorageLinkId('');
         setSelectedVariety('');
         setSelectedOrders(new Set());
         setQuantities(new Map());
         setActiveStep(0);
-        setOrderDate(formatDate(new Date())); // Reset to today's date
+        setOrderDate(formatDate(new Date()));
         if (remarksRef.current) {
           remarksRef.current.value = '';
         }
+        if (paymentMode === 'paid' && farmerStorageLinkId) {
+          setPaymentDialogInitialData({
+            paymentType: 'RENT',
+            farmerStorageLinkId,
+            date: formatDate(new Date()),
+          });
+          setPaymentDialogOpen(true);
+        }
+        setFarmerStorageLinkId('');
       },
     });
   }, [
@@ -562,6 +578,7 @@ export function useOutgoingOrder() {
     remarksRef,
     createOutgoingOrderMutation,
     orderDate,
+    paymentMode,
   ]);
 
   return {
@@ -583,6 +600,12 @@ export function useOutgoingOrder() {
     quantityError,
     summarySheetOpen,
     setSummarySheetOpen,
+    paymentMode,
+    setPaymentMode,
+    paymentDialogOpen,
+    setPaymentDialogOpen,
+    paymentDialogInitialData,
+    setPaymentDialogInitialData,
     orderDate,
     remarksRef,
     autoSelectedCommodityRef,
