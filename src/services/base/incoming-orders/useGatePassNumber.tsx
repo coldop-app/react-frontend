@@ -6,6 +6,7 @@ import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useRouterState } from '@tanstack/react-router';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 
 export type GatePassType = 'incoming' | 'outgoing';
 
@@ -53,12 +54,7 @@ export const useGetGatePassNumber = (
   // 🔥 Error toast
   useEffect(() => {
     if (query.isError && query.error) {
-      const message =
-        query.error.response?.data?.error?.message ||
-        query.error.response?.data?.message ||
-        query.error.message ||
-        'Failed to fetch gate pass number';
-      toast.error(message);
+      toast.error(getErrorMessage(query.error, 'Failed to fetch gate pass number'));
     }
   }, [query.isError, query.error]);
 

@@ -4,6 +4,7 @@ import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import { useNavigate } from '@tanstack/react-router';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 
 import type { EditIncomingOrderInput, EditIncomingOrderApiResponse } from '@/types/incomingOrder';
 
@@ -62,14 +63,7 @@ export const useEditIncomingOrder = () => {
     // -------------------------
     onError: (error) => {
       setLoading(false);
-
-      const message =
-        error.response?.data?.error?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to update incoming order';
-
-      toast.error(message);
+      toast.error(getErrorMessage(error, 'Failed to update incoming order'));
     },
   });
 };

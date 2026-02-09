@@ -6,6 +6,7 @@ import storeAdminAxiosClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import { useNavigate } from '@tanstack/react-router';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 
 import type {
   CreateIncomingOrderInput,
@@ -64,14 +65,7 @@ export const useCreateIncomingOrder = () => {
     // -------------------------
     onError: (error) => {
       setLoading(false);
-
-      const message =
-        error.response?.data?.error?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to create incoming order';
-
-      toast.error(message);
+      toast.error(getErrorMessage(error, 'Failed to create incoming order'));
     },
   });
 };

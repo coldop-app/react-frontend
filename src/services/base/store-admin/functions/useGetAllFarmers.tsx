@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import type { ApiResponse } from '@/types/apiResponse';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
@@ -49,13 +50,7 @@ export const useGetAllFarmers = () => {
   // 🔥 Unified error handling
   useEffect(() => {
     if (query.isError && query.error) {
-      const msg =
-        query.error.response?.data?.error?.message ||
-        query.error.response?.data?.message ||
-        query.error.message ||
-        'Failed to fetch farmers';
-
-      toast.error(msg);
+      toast.error(getErrorMessage(query.error, 'Failed to fetch farmers'));
     }
   }, [query.isError, query.error]);
 
@@ -110,13 +105,7 @@ export const useGetFarmerById = (id: string) => {
   // 🔥 Error toast
   useEffect(() => {
     if (query.isError && query.error) {
-      const msg =
-        query.error.response?.data?.error?.message ||
-        query.error.response?.data?.message ||
-        query.error.message ||
-        'Failed to fetch farmer';
-
-      toast.error(msg);
+      toast.error(getErrorMessage(query.error, 'Failed to fetch farmer'));
     }
   }, [query.isError, query.error]);
 

@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import { storeAdminFarmerRegisterSchema } from '@/schemas/storeAdminFarmerRegister';
 import type { z } from 'zod';
 import type { ApiResponse } from '@/types/apiResponse';
@@ -34,8 +35,7 @@ export const useStoreAdminRegisterFarmer = () => {
     },
 
     onError: (error) => {
-      const msg = error.response?.data?.message || 'Failed to register farmer';
-      toast.error(msg);
+      toast.error(getErrorMessage(error, 'Failed to register farmer'));
     },
   });
 };

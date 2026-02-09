@@ -18,56 +18,76 @@ const validateQuantityString = (val: string): boolean => {
 };
 
 // Variety entry schema (matches the form structure)
-export const varietyEntrySchema = z.object({
-  variety: z.string().min(1, 'Variety name is required'),
-  quantities: z
-    .record(z.string(), z.string())
-    .refine(
-      (quantities) => {
-        // At least one quantity must be provided and valid (allows floats)
-        return Object.values(quantities).some((qty) => validateQuantityString(qty));
-      },
-      {
-        message: 'At least one valid quantity must be provided for this variety',
+export const varietyEntrySchema = z
+  .object({
+    variety: z.string().min(1, 'Variety name is required'),
+    quantities: z
+      .record(z.string(), z.string())
+      .refine(
+        (quantities) => {
+          // At least one quantity must be provided and valid (allows floats)
+          return Object.values(quantities).some((qty) => validateQuantityString(qty));
+        },
+        {
+          message: 'At least one valid quantity must be provided for this variety',
+        }
+      )
+      .refine(
+        (quantities) => {
+          // All non-empty quantities must be valid numbers (allows floats)
+          return Object.values(quantities).every((qty) => {
+            if (!qty || qty.trim() === '') return true; // Empty is allowed
+            return validateQuantityString(qty);
+          });
+        },
+        {
+          message: 'All quantities must be valid positive numbers (decimals allowed)',
+        }
+      ),
+    customMarka: z
+      .record(z.string(), z.string())
+      .optional()
+      .refine(
+        (customMarka) => {
+          if (!customMarka) return true;
+          // If customMarka exists, validate max length for each value
+          return Object.values(customMarka).every((marka) => !marka || marka.length <= 50);
+        },
+        {
+          message: 'Custom marka must be at most 50 characters',
+        }
+      ),
+    locations: z
+      .record(
+        z.string(),
+        z.object({
+          chamber: z.string().optional().nullable(),
+          floor: z.string().optional().nullable(),
+          row: z.string().optional().nullable(),
+        })
+      )
+      .optional(),
+    pricePerBagSize: z.record(z.string(), z.string()).optional(),
+  })
+  .refine(
+    (variety) => {
+      const quantities = variety.quantities ?? {};
+      const locations = variety.locations ?? {};
+      for (const [size, qty] of Object.entries(quantities)) {
+        if (!qty || qty.trim() === '' || isNaN(parseFloat(qty)) || parseFloat(qty) <= 0) continue;
+        const loc = locations[size];
+        const hasLocation =
+          loc &&
+          [loc.floor, loc.row, loc.chamber].every((v) => typeof v === 'string' && v.trim() !== '');
+        if (!hasLocation) return false;
       }
-    )
-    .refine(
-      (quantities) => {
-        // All non-empty quantities must be valid numbers (allows floats)
-        return Object.values(quantities).every((qty) => {
-          if (!qty || qty.trim() === '') return true; // Empty is allowed
-          return validateQuantityString(qty);
-        });
-      },
-      {
-        message: 'All quantities must be valid positive numbers (decimals allowed)',
-      }
-    ),
-  customMarka: z
-    .record(z.string(), z.string())
-    .optional()
-    .refine(
-      (customMarka) => {
-        if (!customMarka) return true;
-        // If customMarka exists, validate max length for each value
-        return Object.values(customMarka).every((marka) => !marka || marka.length <= 50);
-      },
-      {
-        message: 'Custom marka must be at most 50 characters',
-      }
-    ),
-  locations: z
-    .record(
-      z.string(),
-      z.object({
-        chamber: z.string().optional().nullable(),
-        floor: z.string().optional().nullable(),
-        row: z.string().optional().nullable(),
-      })
-    )
-    .optional(),
-  pricePerBagSize: z.record(z.string(), z.string()).optional(),
-});
+      return true;
+    },
+    {
+      message:
+        'Location is required: please select Floor, Row and Chamber for each bag size that has a quantity',
+    }
+  );
 
 // Main incoming order form schema for regular vouchers
 export const incomingOrderFormSchema = z.object({
