@@ -24,6 +24,7 @@ export interface IncomingOrderBagSize {
   floor: string | null;
   row: string | null;
   chamber: string | null;
+  pricePerBag?: number; // Price per bag (₹) for this size; total stored as storeCharge
 }
 
 export interface IncomingOrderVariety {

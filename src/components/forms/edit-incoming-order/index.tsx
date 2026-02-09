@@ -96,6 +96,7 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
       const customMarka: Record<string, string> = {};
       const locations: Record<string, { chamber: string; floor: string; row: string }> = {};
 
+      const pricePerBagSize: Record<string, string> = {};
       variety.bagSizes.forEach((bagSize) => {
         quantities[bagSize.name] = bagSize.quantityCurr.toString();
         locations[bagSize.name] = {
@@ -103,6 +104,10 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
           floor: bagSize.floor || '',
           row: bagSize.row || '',
         };
+        const price = (bagSize as { pricePerBag?: number }).pricePerBag;
+        if (price != null && !isNaN(price)) {
+          pricePerBagSize[bagSize.name] = price.toString();
+        }
       });
 
       // Initialize empty quantities/locations for sizes not in bagSizes
@@ -113,6 +118,9 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
         if (!locations[size]) {
           locations[size] = { chamber: '', floor: '', row: '' };
         }
+        if (pricePerBagSize[size] === undefined) {
+          pricePerBagSize[size] = '';
+        }
       });
 
       return {
@@ -121,7 +129,7 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
         quantities,
         customMarka,
         locations,
-        pricePerBagSize: commoditySizes.reduce((acc, size) => ({ ...acc, [size]: '' }), {}),
+        pricePerBagSize,
       };
     });
 
@@ -372,6 +380,11 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
             return value.trim();
           };
 
+          // Price per bag for this size (optional)
+          const priceStr = v.pricePerBagSize?.[size];
+          const pricePerBag =
+            priceStr && priceStr.trim() !== '' ? parseFloat(priceStr.trim()) : undefined;
+
           // Build bagSize object, only including customMarka if it has a value
           const bagSize: IncomingOrderBagSize = {
             name: size,
@@ -383,6 +396,9 @@ export default function EditIncomingOrderPage({ order }: EditIncomingOrderPagePr
             chamber: toNullIfEmpty(location.chamber),
             ...(customMarkaValue && customMarkaValue.trim() !== ''
               ? { customMarka: customMarkaValue.trim() }
+              : {}),
+            ...(pricePerBag !== undefined && !isNaN(pricePerBag) && pricePerBag >= 0
+              ? { pricePerBag }
               : {}),
           };
 

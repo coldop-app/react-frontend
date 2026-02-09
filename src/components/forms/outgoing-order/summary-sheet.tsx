@@ -33,6 +33,7 @@ interface SelectedBag {
   quantity: number;
   quantityCurr: number;
   quantityInit: number;
+  pricePerBag?: number;
 }
 
 interface SummarySheetProps {
@@ -134,6 +135,16 @@ function SummarySheetComponent({
   const totalQuantity = useMemo(() => {
     return selectedBags.reduce((s, b) => s + b.quantity, 0);
   }, [selectedBags]);
+
+  // Total price: sum of (quantity × pricePerBag) for each selected bag
+  const totalPrice = useMemo(() => {
+    return selectedBags.reduce((sum, b) => sum + b.quantity * (b.pricePerBag ?? 0), 0);
+  }, [selectedBags]);
+
+  const hasAnyPrice = useMemo(
+    () => selectedBags.some((b) => b.pricePerBag != null && b.pricePerBag > 0),
+    [selectedBags]
+  );
 
   // Memoize date formatting function
   const formatDate = useCallback((dateString: string | undefined) => {
@@ -253,6 +264,7 @@ function SummarySheetComponent({
                                 <TableRow>
                                   <TableHead className="px-2 py-1">Size</TableHead>
                                   <TableHead className="px-2 py-1">Location</TableHead>
+                                  <TableHead className="px-2 text-right">Price</TableHead>
                                   <TableHead className="px-2 text-right">Avail</TableHead>
                                   <TableHead className="px-2 text-right">Sel</TableHead>
                                   <TableHead className="px-2 text-right">Rem</TableHead>
@@ -269,6 +281,10 @@ function SummarySheetComponent({
                                     >
                                       <TableCell className="px-2 py-1">{bag.size}</TableCell>
                                       <TableCell className="px-2 py-1">{bag.location}</TableCell>
+
+                                      <TableCell className="px-2 py-1 text-right text-primary font-medium">
+                                        {bag.pricePerBag != null ? `₹${bag.pricePerBag}/bag` : '–'}
+                                      </TableCell>
 
                                       <TableCell className="px-2 py-1 text-right">
                                         {bag.quantityCurr.toFixed(1)}
@@ -302,7 +318,12 @@ function SummarySheetComponent({
               <p className="text-sm font-semibold">Total Bags Selected:</p>
               <p className="text-lg font-bold text-primary">{totalQuantity.toFixed(1)}</p>
             </div>
-
+            {hasAnyPrice && (
+              <div className="flex justify-between items-center border-t pt-2">
+                <p className="text-sm font-semibold">Total Amount (₹):</p>
+                <p className="text-lg font-bold text-primary">₹{totalPrice.toFixed(2)}</p>
+              </div>
+            )}
             <p className="text-xs text-muted-foreground border-t pt-2">
               {selectedBags.length} unique bag(s) across {orderGroupsForRender.length} gate passes
             </p>

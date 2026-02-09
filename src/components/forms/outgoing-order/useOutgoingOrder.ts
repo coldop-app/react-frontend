@@ -182,6 +182,7 @@ export function useOutgoingOrder() {
       quantityCurr: number;
       quantityInit: number;
       location: string;
+      pricePerBag?: number;
     }> = [];
 
     order.varieties.forEach((variety) => {
@@ -192,6 +193,7 @@ export function useOutgoingOrder() {
             quantityCurr: bagSize.quantityCurr,
             quantityInit: bagSize.quantityInit,
             location: `${bagSize.chamber}/${bagSize.floor}/${bagSize.row}`,
+            pricePerBag: bagSize.pricePerBag,
           });
         }
       });
@@ -381,6 +383,7 @@ export function useOutgoingOrder() {
       quantity: number;
       quantityCurr: number;
       quantityInit: number;
+      pricePerBag?: number;
     }> = [];
 
     quantities.forEach((quantity, cardKey) => {
@@ -403,6 +406,7 @@ export function useOutgoingOrder() {
                 quantity,
                 quantityCurr: data.quantityCurr,
                 quantityInit: data.quantityInit,
+                pricePerBag: data.pricePerBag,
               });
               return; // Found match, move to next cardKey
             }

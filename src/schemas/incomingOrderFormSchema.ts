@@ -66,6 +66,7 @@ export const varietyEntrySchema = z.object({
       })
     )
     .optional(),
+  pricePerBagSize: z.record(z.string(), z.string()).optional(),
 });
 
 // Main incoming order form schema for regular vouchers

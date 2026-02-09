@@ -414,6 +414,11 @@ export default function IncomingOrderPage() {
               return value.trim();
             };
 
+            // Price per bag for this size (optional)
+            const priceStr = v.pricePerBagSize?.[size];
+            const pricePerBag =
+              priceStr && priceStr.trim() !== '' ? parseFloat(priceStr.trim()) : undefined;
+
             // Build bagSize object, only including customMarka if it has a value
             const bagSize = {
               name: size,
@@ -425,6 +430,9 @@ export default function IncomingOrderPage() {
               chamber: toNullIfEmpty(location.chamber),
               ...(customMarkaValue && customMarkaValue.trim() !== ''
                 ? { customMarka: customMarkaValue.trim() }
+                : {}),
+              ...(pricePerBag !== undefined && !isNaN(pricePerBag) && pricePerBag >= 0
+                ? { pricePerBag }
                 : {}),
             } as IncomingOrderBagSize;
 
