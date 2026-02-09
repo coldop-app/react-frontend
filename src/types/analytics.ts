@@ -7,6 +7,18 @@ export interface AnalyticsOverviewApiResponse {
 }
 
 /**
+ * Farmer summary row for analytics (orders + rent)
+ */
+export interface FarmerSummaryRow {
+  farmerStorageLinkId: string;
+  farmerName: string;
+  totalIncomingOrders: number;
+  totalOutgoingOrders: number;
+  rentPaid: number;
+  rentDue: number;
+}
+
+/**
  * Main analytics data structure
  */
 export interface AnalyticsOverviewData {
@@ -15,6 +27,7 @@ export interface AnalyticsOverviewData {
   commoditySummary: CommoditySummary[];
   stockTrend: StockTrend[];
   locationAnalytics: LocationAnalytics[];
+  farmerSummary?: FarmerSummaryRow[];
 }
 
 /**

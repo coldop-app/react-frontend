@@ -8,6 +8,7 @@ import { StockTrendChart } from './stock-trend-chart';
 import { VarietyDistributionChart } from './variety-distribution-chart';
 import { TopFarmersChart } from './top-farmers-chart';
 import { LocationAnalyticsTable } from './location-analytics-table';
+import { FarmerSummaryTable } from './farmer-summary-table';
 import { CommodityBreakdown } from './commodity-breakdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -332,6 +333,11 @@ export default function AnalyticsPage() {
 
       {/* Location Analytics */}
       <LocationAnalyticsTable data={transformedData.locationAnalytics} />
+
+      {/* Farmer Summary (orders + rent) */}
+      {data?.data?.farmerSummary && data.data.farmerSummary.length > 0 && (
+        <FarmerSummaryTable data={data.data.farmerSummary} />
+      )}
 
       {/* Commodity Breakdown - Only show if more than one commodity */}
       {commodities.length > 1 && <CommodityBreakdown data={transformedData.commoditySummary} />}
