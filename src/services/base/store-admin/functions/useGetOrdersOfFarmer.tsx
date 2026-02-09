@@ -3,6 +3,7 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import type { ApiResponse } from '@/types/apiResponse';
 import type { DaybookOrder } from '@/types/daybook';
 import { toast } from 'sonner';
@@ -89,13 +90,7 @@ export const useGetOrdersOfFarmer = ({
     }
 
     if (query.error && !hasShownError.current) {
-      const msg =
-        query.error.response?.data?.error?.message ||
-        query.error.response?.data?.message ||
-        query.error.message ||
-        'Failed to fetch farmer orders';
-
-      toast.error(msg);
+      toast.error(getErrorMessage(query.error, 'Failed to fetch farmer orders'));
       hasShownError.current = true;
     }
   }, [query.isError, query.error]);

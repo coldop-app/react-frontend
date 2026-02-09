@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@/stores/store';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import type { ProfileSettingsApiResponse, StoreAdmin } from '@/types/storeAdmin';
@@ -137,13 +138,7 @@ export const useUpdateProfileSettings = () => {
         setAdminData(context.previousAdmin, coldStorage, token);
       }
 
-      const message =
-        error.response?.data?.error?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to update profile';
-
-      toast.error(message);
+      toast.error(getErrorMessage(error, 'Failed to update profile'));
     },
 
     // Always refetch after error or success to ensure we have the latest data

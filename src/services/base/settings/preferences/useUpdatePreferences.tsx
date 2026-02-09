@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@/stores/store';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import type { PreferencesApiResponse, PreferencesData } from '@/types/settings/preferences';
@@ -132,13 +133,7 @@ export const useUpdatePreferences = () => {
         updatePreferences(context.previousColdStorage.preferences);
       }
 
-      const message =
-        error.response?.data?.error?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to update preferences';
-
-      toast.error(message);
+      toast.error(getErrorMessage(error, 'Failed to update preferences'));
     },
 
     // Always refetch after error or success to ensure we have the latest data

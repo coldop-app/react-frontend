@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import type { ApiResponse } from '@/types/apiResponse';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
@@ -22,12 +23,7 @@ export const useGetPreferencesById = (id: string, enabled = true) => {
   // Handle errors using useEffect (onError is not available in useQuery)
   useEffect(() => {
     if (query.isError && query.error) {
-      const message =
-        query.error.response?.data?.error?.message ||
-        query.error.response?.data?.message ||
-        query.error.message ||
-        'Failed to fetch preferences';
-      toast.error(message);
+      toast.error(getErrorMessage(query.error, 'Failed to fetch preferences'));
     }
   }, [query.isError, query.error]);
 

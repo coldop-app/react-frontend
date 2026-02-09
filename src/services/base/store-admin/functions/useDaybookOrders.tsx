@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import type { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useStore } from '@/stores/store';
@@ -95,10 +96,7 @@ export const useDaybook = (params?: DaybookQueryParams) => {
     }
 
     if (query.error && !hasShownError.current) {
-      const msg =
-        query.error.response?.data?.message || query.error.message || 'Failed to fetch daybook';
-
-      toast.error(msg);
+      toast.error(getErrorMessage(query.error, 'Failed to fetch daybook'));
       hasShownError.current = true;
     }
   }, [query.isError, query.error]);

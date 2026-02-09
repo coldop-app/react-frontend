@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { StoreAdminLoginInput, StoreAdminLoginApiResponse } from '@/types/storeAdmin';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useNavigate, useSearch } from '@tanstack/react-router';
@@ -60,10 +61,7 @@ export const useStoreAdminLogin = () => {
 
     onError: (error) => {
       setLoading(false);
-
-      const errMsg = error.response?.data?.message || error.message || 'Login failed';
-
-      toast.error(errMsg);
+      toast.error(getErrorMessage(error, 'Login failed'));
     },
   });
 };

@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@/stores/store';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
@@ -59,14 +60,7 @@ export const useCreatePaymentHistory = () => {
     // -------------------------
     onError: (error) => {
       setLoading(false);
-
-      const message =
-        error.response?.data?.error?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to create payment';
-
-      toast.error(message);
+      toast.error(getErrorMessage(error, 'Failed to create payment'));
     },
   });
 };

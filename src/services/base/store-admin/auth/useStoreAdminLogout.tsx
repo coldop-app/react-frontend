@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import storeAdminAxiosClient from '@/lib/axios';
+import { getErrorMessage } from '@/lib/getErrorMessage';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@/stores/store';
@@ -51,9 +52,7 @@ export const useStoreAdminLogout = () => {
       clearAdminData();
       queryClient.removeQueries({ queryKey: ['store-admin'] });
 
-      const errMsg = error.response?.data?.message || error.message || 'Logout failed';
-
-      toast.error(errMsg);
+      toast.error(getErrorMessage(error, 'Logout failed'));
 
       navigate({
         to: '/auth/login',
