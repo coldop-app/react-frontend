@@ -82,6 +82,7 @@ interface StepInfoProps {
     quantityCurr: number;
     quantityInit: number;
     location: string;
+    pricePerBag?: number;
   }>;
   getCardKey: (orderId: string, size: string, variety: string, location: string) => string;
 }
@@ -385,6 +386,11 @@ export const StepInfo: React.FC<StepInfoProps> = ({
                                                   <p className="text-xs text-muted-foreground/70 mt-0.5">
                                                     /{data.quantityInit.toFixed(1)}
                                                   </p>
+                                                  {data.pricePerBag != null && (
+                                                    <p className="text-xs text-primary font-medium mt-1">
+                                                      ₹{data.pricePerBag}/bag
+                                                    </p>
+                                                  )}
                                                 </div>
                                               </div>
                                             </div>

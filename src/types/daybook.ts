@@ -75,6 +75,8 @@ export interface BagSize {
   floor: string;
   row: string;
   chamber: string;
+  /** Price per bag (₹) set at incoming for this size */
+  pricePerBag?: number;
 }
 
 /**
