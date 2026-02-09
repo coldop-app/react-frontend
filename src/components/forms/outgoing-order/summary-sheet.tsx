@@ -9,6 +9,7 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
@@ -47,6 +48,8 @@ interface SummarySheetProps {
   selectedVariety: string;
   paymentMode: 'paid' | 'credit';
   onPaymentModeChange: (mode: 'paid' | 'credit') => void;
+  rentAmountForPayment: string;
+  onRentAmountChange: (value: string) => void;
   remarksRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit: () => void;
   isSubmitting: boolean;
@@ -61,6 +64,8 @@ function SummarySheetComponent({
   selectedVariety,
   paymentMode,
   onPaymentModeChange,
+  rentAmountForPayment,
+  onRentAmountChange,
   remarksRef,
   onSubmit,
   isSubmitting,
@@ -329,9 +334,26 @@ function SummarySheetComponent({
               </label>
             </div>
             {paymentMode === 'paid' && (
-              <p className="text-xs text-muted-foreground">
-                After submitting, Add Payment will open with RENT and this farmer pre-filled.
-              </p>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="rent-amount" className="text-sm font-medium">
+                    Rent amount (₹)
+                  </Label>
+                  <Input
+                    id="rent-amount"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="Enter amount to pre-fill in Add Payment"
+                    value={rentAmountForPayment}
+                    onChange={(e) => onRentAmountChange(e.target.value)}
+                    className="max-w-[200px]"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  After submitting, Add Payment will open with RENT, farmer, and amount pre-filled.
+                </p>
+              </>
             )}
           </div>
 

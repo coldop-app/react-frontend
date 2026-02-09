@@ -24,6 +24,7 @@ export function useOutgoingOrder() {
   const [quantityError, setQuantityError] = useState<string>('');
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'paid' | 'credit'>('credit');
+  const [rentAmountForPayment, setRentAmountForPayment] = useState<string>('');
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentDialogInitialData, setPaymentDialogInitialData] = useState<{
     paymentType: 'RENT' | 'PAYMENT' | 'EXPENSE';
@@ -537,6 +538,11 @@ export function useOutgoingOrder() {
       };
     });
 
+    const paidAmountNum =
+      paymentMode === 'paid' && rentAmountForPayment?.trim()
+        ? parseFloat(rentAmountForPayment.trim())
+        : undefined;
+
     const payload: CreateOutgoingOrderInput = {
       farmerStorageLinkId,
       commodity: selectedCommodity,
@@ -545,6 +551,8 @@ export function useOutgoingOrder() {
       remarks: remarks?.trim() || null,
       varieties,
       date: formatDateToISO(orderDate), // Convert dd.mm.yyyy to ISO format (2025-12-19T00:00:00.000Z)
+      isPaid: paymentMode === 'paid',
+      paidAmount: paidAmountNum,
     };
 
     createOutgoingOrderMutation.mutate(payload, {
@@ -563,9 +571,11 @@ export function useOutgoingOrder() {
           setPaymentDialogInitialData({
             paymentType: 'RENT',
             farmerStorageLinkId,
+            amount: rentAmountForPayment?.trim() ?? '',
             date: formatDate(new Date()),
           });
           setPaymentDialogOpen(true);
+          setRentAmountForPayment('');
         }
         setFarmerStorageLinkId('');
       },
@@ -579,6 +589,7 @@ export function useOutgoingOrder() {
     createOutgoingOrderMutation,
     orderDate,
     paymentMode,
+    rentAmountForPayment,
   ]);
 
   return {
@@ -602,6 +613,8 @@ export function useOutgoingOrder() {
     setSummarySheetOpen,
     paymentMode,
     setPaymentMode,
+    rentAmountForPayment,
+    setRentAmountForPayment,
     paymentDialogOpen,
     setPaymentDialogOpen,
     paymentDialogInitialData,

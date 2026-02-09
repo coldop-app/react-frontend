@@ -65,6 +65,8 @@ export default function OutgoingOrderPage() {
     handleDialogClose,
     paymentMode,
     setPaymentMode,
+    rentAmountForPayment,
+    setRentAmountForPayment,
     paymentDialogOpen,
     setPaymentDialogOpen,
     paymentDialogInitialData,
@@ -160,6 +162,8 @@ export default function OutgoingOrderPage() {
         selectedVariety={selectedVariety}
         paymentMode={paymentMode}
         onPaymentModeChange={setPaymentMode}
+        rentAmountForPayment={rentAmountForPayment}
+        onRentAmountChange={setRentAmountForPayment}
         remarksRef={remarksRef}
         onSubmit={handleSubmit}
         isSubmitting={createOutgoingOrderMutation.isPending}
