@@ -27,6 +27,8 @@ export interface DaybookOrder {
   totalBags?: number; // present in outgoing
   totalWeight?: number; // present in outgoing
   createdBy?: CreatedBy; // present in outgoing
+  /** Incoming only: store charge / rent for this voucher */
+  storeCharge?: number;
   rentEntry?: RentEntry; // present in incoming when store charge is paid
 }
 
