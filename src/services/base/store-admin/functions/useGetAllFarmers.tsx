@@ -28,6 +28,8 @@ export interface StoreAdminFarmer {
   accountNumber: number;
   isActive: boolean;
   paymentHistory?: PaymentHistoryEntry[];
+  /** Sum of storeCharge from all incoming orders (total rent owed) */
+  totalRentFromOrders?: number;
 }
 
 // ------------------ GET ALL FARMERS ------------------

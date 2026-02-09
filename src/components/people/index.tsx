@@ -191,18 +191,19 @@ interface FarmerCardProps {
 const FarmerCard = ({ farmer }: FarmerCardProps) => {
   const navigate = useNavigate();
 
-  // Calculate rent totals
+  // Rent paid = only Add Payment RENT (exclude "Store charge for incoming order" entries which are rent due)
+  const isStoreChargeEntry = (entry: { type: string; remarks?: string | null }) =>
+    entry.type === 'RENT' && entry.remarks?.includes('Store charge for incoming order');
+
   const rentCalculations = useMemo(() => {
+    const totalRent = farmer.totalRentFromOrders ?? 0;
     const paymentHistory = farmer.paymentHistory || [];
-    const totalRent = paymentHistory
-      .filter((entry) => entry.type === 'RENT')
-      .reduce((sum, entry) => sum + entry.amount, 0);
     const rentPaid = paymentHistory
-      .filter((entry) => entry.type === 'PAYMENT')
+      .filter((entry) => entry.type === 'RENT' && !isStoreChargeEntry(entry))
       .reduce((sum, entry) => sum + entry.amount, 0);
     const remainingRent = totalRent - rentPaid;
     return { totalRent, rentPaid, remainingRent };
-  }, [farmer.paymentHistory]);
+  }, [farmer.paymentHistory, farmer.totalRentFromOrders]);
 
   const handleClick = () => {
     navigate({
