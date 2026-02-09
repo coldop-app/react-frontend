@@ -28,6 +28,10 @@ export interface CreateOutgoingOrderInput {
   remarks?: string | null;
   varieties: OutgoingOrderVariety[];
   date?: string; // OPTIONAL - date in ISO format
+  /** true = paid (opens Add Payment after create), false = credit */
+  isPaid?: boolean;
+  /** Amount paid at voucher time (when isPaid); stored on voucher, pre-fills Add Payment */
+  paidAmount?: number;
 }
 
 export interface OutgoingOrderResponseOrder {

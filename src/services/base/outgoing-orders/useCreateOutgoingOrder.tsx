@@ -41,7 +41,7 @@ export const useCreateOutgoingOrder = () => {
     // -------------------------
     // Success Handler
     // -------------------------
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       if (!data.success) {
         toast.error(data.message || 'Unexpected error');
         return;
@@ -49,10 +49,12 @@ export const useCreateOutgoingOrder = () => {
 
       toast.success(data.message || 'Outgoing order created!');
 
-      // TanStack Router navigation
-      navigate({
-        to: '/store-admin/daybook',
-      });
+      // When paid, caller opens Add Payment dialog — stay on page; otherwise go to daybook
+      if (!variables.isPaid) {
+        navigate({
+          to: '/store-admin/daybook',
+        });
+      }
 
       // Invalidate data
       queryClient.invalidateQueries({ queryKey: ['outgoing-orders'] });
