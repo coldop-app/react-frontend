@@ -372,7 +372,7 @@ function SummarySheetComponent({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  After submitting, Add Payment will open with RENT, farmer, and amount pre-filled.
+                  After submitting, Add Payment will open with Payment (payment received), farmer, and amount pre-filled.
                 </p>
               </>
             )}

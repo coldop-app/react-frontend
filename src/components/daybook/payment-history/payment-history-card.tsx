@@ -48,7 +48,7 @@ export const PaymentHistoryCard: React.FC<PaymentHistoryCardProps> = ({ payment,
   const formattedDate = useMemo(() => formatDate(payment.date), [payment.date]);
   const formattedAmount = useMemo(() => formatAmount(payment.amount), [payment.amount]);
 
-  // Get payment type badge color
+  // Green = payment received (PAYMENT), blue = rent to be paid (RENT), red = expense (EXPENSE)
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'RENT':
@@ -62,13 +62,29 @@ export const PaymentHistoryCard: React.FC<PaymentHistoryCardProps> = ({ payment,
     }
   };
 
+  const getTypeDotColor = (type: string) => {
+    switch (type) {
+      case 'PAYMENT':
+        return 'bg-green-500';
+      case 'RENT':
+        return 'bg-blue-500';
+      case 'EXPENSE':
+        return 'bg-red-500';
+      default:
+        return 'bg-muted-foreground';
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-4">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-2 h-2 bg-primary rounded-full shrink-0 mt-0.5" />
+            <div
+              className={`w-2 h-2 rounded-full shrink-0 mt-0.5 ${getTypeDotColor(payment.type)}`}
+              aria-hidden
+            />
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
               Payment #{payment.id.slice(-8).toUpperCase()}
             </h2>
