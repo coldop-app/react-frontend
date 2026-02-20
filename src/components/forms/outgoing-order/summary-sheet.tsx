@@ -357,11 +357,11 @@ function SummarySheetComponent({
             {paymentMode === 'paid' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="rent-amount" className="text-sm font-medium">
-                    Rent amount (₹)
+                  <Label htmlFor="payment-amount" className="text-sm font-medium">
+                    Payment amount (₹)
                   </Label>
                   <Input
-                    id="rent-amount"
+                    id="payment-amount"
                     type="number"
                     min={0}
                     step="0.01"
@@ -372,7 +372,8 @@ function SummarySheetComponent({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  After submitting, Add Payment will open with Payment (payment received), farmer, and amount pre-filled.
+                  After submitting, Add Payment will open with Payment (payment received), farmer,
+                  and amount pre-filled.
                 </p>
               </>
             )}

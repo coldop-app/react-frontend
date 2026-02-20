@@ -72,7 +72,7 @@ export interface PaymentDialogInitialData {
 interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** When opening from outgoing voucher (Paid), prefill payment type RENT and farmer */
+  /** When opening from outgoing voucher (Paid), prefill payment type PAYMENT (payment received) and farmer */
   initialData?: PaymentDialogInitialData | null;
 }
 
@@ -155,7 +155,7 @@ export const PaymentDialog: React.FC<PaymentDialogProps> = ({
     if (open) {
       if (initialData && (initialData.paymentType || initialData.farmerStorageLinkId)) {
         form.reset({
-          paymentType: initialData.paymentType ?? 'RENT',
+          paymentType: initialData.paymentType ?? 'PAYMENT',
           farmerStorageLinkId: initialData.farmerStorageLinkId ?? '',
           amount: initialData.amount ?? '',
           date: initialData.date ?? formatDate(new Date()),
