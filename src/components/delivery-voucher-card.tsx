@@ -7,6 +7,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 
 import type { DaybookOrder } from '@/types/daybook';
+import { printDeliveryVoucher } from '@/lib/print-voucher';
 
 // ------------------ Types ------------------
 
@@ -96,8 +97,8 @@ function DeliveryVoucherCard({ data }: DeliveryVoucherCardProps) {
   }, []);
 
   const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
+    printDeliveryVoucher(data);
+  }, [data]);
 
   // ------------------ Table Data ------------------
 

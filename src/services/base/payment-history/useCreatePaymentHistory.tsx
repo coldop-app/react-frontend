@@ -50,9 +50,10 @@ export const useCreatePaymentHistory = () => {
 
       toast.success(data.message || 'Payment created successfully!');
 
-      // Invalidate relevant queries
+      // Invalidate relevant queries (farmers include payment history)
       queryClient.invalidateQueries({ queryKey: ['payment-history'] });
       queryClient.invalidateQueries({ queryKey: ['daybook'] });
+      queryClient.invalidateQueries({ queryKey: ['farmers'] });
     },
 
     // -------------------------

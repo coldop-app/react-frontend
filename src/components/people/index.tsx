@@ -27,13 +27,21 @@ import {
   ChevronDown,
   IndianRupee,
   RefreshCw,
+  Wallet,
 } from 'lucide-react';
+import { PaymentDialog } from '@/components/daybook/payment-dialog';
 
 const PeoplePage = () => {
   const { data, isLoading, error, refetch, isFetching } = useGetAllFarmers();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'Name' | 'Account Number'>('Name');
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentDialogInitialData, setPaymentDialogInitialData] = useState<{
+    paymentType: 'RENT';
+    farmerStorageLinkId: string;
+    amount: string;
+  } | null>(null);
 
   const farmers = useMemo(() => data?.data || [], [data?.data]);
 
@@ -174,10 +182,30 @@ const PeoplePage = () => {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredFarmers.map((farmer) => (
-            <FarmerCard farmer={farmer} key={farmer.id} />
+            <FarmerCard
+              farmer={farmer}
+              key={farmer.id}
+              onAddPayment={(farmerStorageLinkId, amount) => {
+                setPaymentDialogInitialData({
+                  paymentType: 'RENT',
+                  farmerStorageLinkId,
+                  amount: String(amount),
+                });
+                setPaymentDialogOpen(true);
+              }}
+            />
           ))}
         </div>
       )}
+
+      <PaymentDialog
+        open={paymentDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) setPaymentDialogInitialData(null);
+          setPaymentDialogOpen(open);
+        }}
+        initialData={paymentDialogInitialData}
+      />
     </div>
   );
 };
@@ -186,9 +214,10 @@ const PeoplePage = () => {
 
 interface FarmerCardProps {
   farmer: StoreAdminFarmer;
+  onAddPayment?: (farmerStorageLinkId: string, amountToBePaid: number) => void;
 }
 
-const FarmerCard = ({ farmer }: FarmerCardProps) => {
+const FarmerCard = ({ farmer, onAddPayment }: FarmerCardProps) => {
   const navigate = useNavigate();
 
   // Rent paid = only Add Payment RENT (exclude "Store charge for incoming order" entries which are rent due)
@@ -286,6 +315,20 @@ const FarmerCard = ({ farmer }: FarmerCardProps) => {
                     </p>
                   </div>
                 </div>
+                {rentCalculations.remainingRent > 0 && onAddPayment && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full gap-1.5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddPayment(farmer.id, rentCalculations.remainingRent);
+                    }}
+                  >
+                    <Wallet className="h-3.5 w-3.5" />
+                    Add Payment
+                  </Button>
+                )}
               </div>
             )}
           </div>

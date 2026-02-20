@@ -15,15 +15,20 @@ import {
   IndianRupee,
   Calendar,
   FileText,
+  Wallet,
 } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { useGetOrdersOfFarmer } from '@/services/base/store-admin/functions/useGetOrdersOfFarmer';
-import type { StoreAdminFarmer } from '@/services/base/store-admin/functions/useGetAllFarmers';
+import {
+  type StoreAdminFarmer,
+  useGetAllFarmers,
+} from '@/services/base/store-admin/functions/useGetAllFarmers';
 import { useStore } from '@/stores/store';
 import { groupOrdersByCommodity, getCommoditiesFromOrders, calculateStockSummary } from './helpers';
 import { StockSummaryTable } from './stock-summary-table';
 import ReceiptVoucherCard from '@/components/receipt-voucher-card';
 import DeliveryVoucherCard from '@/components/delivery-voucher-card';
+import { PaymentDialog } from '@/components/daybook/payment-dialog';
 
 export default function FarmerProfilePage() {
   // Get the route param
@@ -31,9 +36,23 @@ export default function FarmerProfilePage() {
     from: '/_authenticated/store-admin/people/$farmerStorageLinkId',
   });
 
-  // Get farmer data from router.state
+  // Get farmer data: prefer server data (so after Add Payment we see updated rent), fallback to router state
   const routerState = useRouterState();
-  const farmer = routerState.location.state?.farmer as StoreAdminFarmer | undefined;
+  const farmerFromState = routerState.location.state?.farmer as StoreAdminFarmer | undefined;
+  const { data: farmersData } = useGetAllFarmers();
+  const farmerFromQuery = useMemo(
+    () => farmersData?.data?.find((f) => f.id === farmerStorageLinkId),
+    [farmersData?.data, farmerStorageLinkId]
+  );
+  const farmer = farmerFromQuery ?? farmerFromState;
+
+  // Payment dialog for Pay Rent (amount = remaining rent / amount to be paid)
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [paymentDialogInitialData, setPaymentDialogInitialData] = useState<{
+    paymentType: 'RENT';
+    farmerStorageLinkId: string;
+    amount: string;
+  } | null>(null);
 
   // Get coldStorage and receipt columns from store
   const { coldStorage, receiptVisibleColumns, setReceiptColumns } = useStore();
@@ -282,6 +301,22 @@ export default function FarmerProfilePage() {
                   </p>
                 </div>
               </div>
+              {farmer && rentCalculations.remainingRent > 0 && (
+                <Button
+                  className="mt-3 gap-2"
+                  onClick={() => {
+                    setPaymentDialogInitialData({
+                      paymentType: 'RENT',
+                      farmerStorageLinkId: farmer.id,
+                      amount: String(rentCalculations.remainingRent),
+                    });
+                    setIsPaymentDialogOpen(true);
+                  }}
+                >
+                  <Wallet className="h-4 w-4" />
+                  Add Payment (amount = rent to be paid)
+                </Button>
+              )}
             </div>
 
             {/* Payment History List */}
@@ -290,6 +325,28 @@ export default function FarmerProfilePage() {
               {sortedPaymentHistory.map((entry) => {
                 const isRentDue = isStoreChargeEntry(entry);
                 const isRentPaid = entry.type === 'RENT' && !isRentDue;
+                const isPayment = entry.type === 'PAYMENT';
+                const isExpense = entry.type === 'EXPENSE';
+                // Badge & amount: red = rent due, green = payment / rent paid, blue = expense
+                const badgeClass =
+                  isRentDue
+                    ? 'bg-destructive/10 text-destructive'
+                    : isRentPaid || isPayment
+                      ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                      : isExpense
+                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                        : 'bg-muted text-muted-foreground';
+                const amountClass =
+                  isRentDue
+                    ? 'text-destructive'
+                    : isRentPaid || isPayment
+                      ? 'text-green-600 dark:text-green-400'
+                      : isExpense
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-muted-foreground';
+                const label =
+                  isRentDue ? 'Rent due' : isRentPaid ? 'Rent paid' : isPayment ? 'Payment' : isExpense ? 'Expense' : entry.type;
+                const sign = isRentDue ? '-' : isRentPaid || isPayment ? '+' : '';
                 return (
                   <div
                     key={entry.id}
@@ -299,15 +356,9 @@ export default function FarmerProfilePage() {
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
                           <div
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              isRentDue
-                                ? 'bg-destructive/10 text-destructive'
-                                : isRentPaid
-                                  ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                                  : 'bg-muted text-muted-foreground'
-                            }`}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${badgeClass}`}
                           >
-                            {isRentDue ? 'Rent due' : isRentPaid ? 'Rent paid' : entry.type}
+                            {label}
                           </div>
                           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                             <Calendar className="h-3.5 w-3.5" />
@@ -322,17 +373,8 @@ export default function FarmerProfilePage() {
                         )}
                       </div>
                       <div className="text-right">
-                        <p
-                          className={`text-lg font-bold ${
-                            isRentDue
-                              ? 'text-destructive'
-                              : isRentPaid
-                                ? 'text-green-600 dark:text-green-400'
-                                : 'text-muted-foreground'
-                          }`}
-                        >
-                          {isRentDue ? '-' : isRentPaid ? '+' : ''}₹
-                          {entry.amount.toLocaleString('en-IN')}
+                        <p className={`text-lg font-bold ${amountClass}`}>
+                          {sign}₹{entry.amount.toLocaleString('en-IN')}
                         </p>
                       </div>
                     </div>
@@ -390,6 +432,15 @@ export default function FarmerProfilePage() {
           </CardContent>
         </Card>
       )}
+
+      <PaymentDialog
+        open={isPaymentDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) setPaymentDialogInitialData(null);
+          setIsPaymentDialogOpen(open);
+        }}
+        initialData={paymentDialogInitialData}
+      />
     </div>
   );
 }

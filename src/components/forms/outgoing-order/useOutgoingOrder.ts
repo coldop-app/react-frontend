@@ -573,7 +573,7 @@ export function useOutgoingOrder() {
         }
         if (paymentMode === 'paid' && farmerStorageLinkId) {
           setPaymentDialogInitialData({
-            paymentType: 'RENT',
+            paymentType: 'PAYMENT',
             farmerStorageLinkId,
             amount: rentAmountForPayment?.trim() ?? '',
             date: formatDate(new Date()),

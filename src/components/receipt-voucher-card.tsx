@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/data-table';
 import type { DaybookOrder } from '@/types/daybook';
 import type { ColdStorage } from '@/types/coldStorage';
 import { useNavigate } from '@tanstack/react-router';
+import { printReceiptVoucher } from '@/lib/print-voucher';
 
 interface TableRow {
   variety: string;
@@ -95,11 +96,9 @@ function ReceiptVoucherCard({
     setIsExpanded((prev) => !prev);
   }, []);
 
-  // Memoize print handler (placeholder)
   const handlePrint = useCallback(() => {
-    // Implement print logic
-    window.print();
-  }, []);
+    printReceiptVoucher(data, coldStorage?.name);
+  }, [data, coldStorage?.name]);
 
   // Get commodity size order from preferences
   const commodityOrder = useMemo(() => {

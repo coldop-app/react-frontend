@@ -6,6 +6,14 @@ export interface AnalyticsOverviewApiResponse {
   data: AnalyticsOverviewData;
 }
 
+/** Incoming/outgoing breakdown by variety and bag size */
+export interface FarmerSummaryBreakdownItem {
+  commodity: string;
+  variety: string;
+  bagSize: string;
+  quantity: number;
+}
+
 /**
  * Farmer summary row for analytics (orders + rent)
  */
@@ -16,6 +24,8 @@ export interface FarmerSummaryRow {
   totalOutgoingOrders: number;
   rentPaid: number;
   rentDue: number;
+  incomingBreakdown?: FarmerSummaryBreakdownItem[];
+  outgoingBreakdown?: FarmerSummaryBreakdownItem[];
 }
 
 /**
