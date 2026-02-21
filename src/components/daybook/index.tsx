@@ -31,6 +31,10 @@ export default function DaybookPage() {
   const [commodityFilter, setCommodityFilter] = useState('All Commodities');
   const [currentPage, setCurrentPage] = useState(1);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [dateFromInput, setDateFromInput] = useState('');
+  const [dateToInput, setDateToInput] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const [isPending, startTransition] = useTransition();
 
@@ -77,6 +81,25 @@ export default function DaybookPage() {
     setSearchQuery(query);
   }, []);
 
+  const toDateTimeISO = useCallback((dateOnly: string, endOfDay: boolean) => {
+    if (!dateOnly) return '';
+    return endOfDay ? `${dateOnly}T23:59:59.999Z` : `${dateOnly}T00:00:00.000Z`;
+  }, []);
+
+  const handleApplyDateRange = useCallback(() => {
+    setDateFrom(dateFromInput);
+    setDateTo(dateToInput);
+    startTransition(() => setCurrentPage(1));
+  }, [dateFromInput, dateToInput]);
+
+  const handleClearDateRange = useCallback(() => {
+    setDateFromInput('');
+    setDateToInput('');
+    setDateFrom('');
+    setDateTo('');
+    startTransition(() => setCurrentPage(1));
+  }, []);
+
   // ----- RESET PAGE ON SEARCH -----
   const prevDebouncedSearch = useRef(debouncedSearch);
 
@@ -94,14 +117,30 @@ export default function DaybookPage() {
     return commodityFilter === 'All Commodities' ? undefined : commodityFilter;
   }, [commodityFilter]);
 
-  const { data, isLoading, isFetching, isError, error, refetch } = useDaybook({
-    type: typeFilter,
-    commodity: commodityParam,
-    sortBy: sortByFilter,
-    search: debouncedSearch.trim() || undefined,
-    page: currentPage,
-    limit: 4,
-  });
+  const daybookParams = useMemo(
+    () => ({
+      type: typeFilter,
+      commodity: commodityParam,
+      sortBy: sortByFilter,
+      search: debouncedSearch.trim() || undefined,
+      page: currentPage,
+      limit: 4,
+      ...(dateFrom && { dateFrom: toDateTimeISO(dateFrom, false) }),
+      ...(dateTo && { dateTo: toDateTimeISO(dateTo, true) }),
+    }),
+    [
+      typeFilter,
+      commodityParam,
+      sortByFilter,
+      debouncedSearch,
+      currentPage,
+      dateFrom,
+      dateTo,
+      toDateTimeISO,
+    ]
+  );
+
+  const { data, isLoading, isFetching, isError, error, refetch } = useDaybook(daybookParams);
 
   const pagination = data?.pagination;
 
@@ -139,6 +178,12 @@ export default function DaybookPage() {
         onSortFilterChange={handleSortFilterChange}
         onCommodityFilterChange={handleCommodityFilterChange}
         onAddPayment={() => setIsPaymentDialogOpen(true)}
+        dateFromInput={dateFromInput}
+        dateToInput={dateToInput}
+        onDateFromInputChange={setDateFromInput}
+        onDateToInputChange={setDateToInput}
+        onApplyDateRange={handleApplyDateRange}
+        onClearDateRange={handleClearDateRange}
       />
 
       {(isFetching || isPending) && !isLoading && (

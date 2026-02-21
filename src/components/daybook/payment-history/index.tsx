@@ -214,7 +214,7 @@ const PaymentHistoryPage = () => {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm font-medium text-muted-foreground">Filters</span>
+              <span className="text-sm font-medium text-muted-foreground">Show by date range</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-0">
               <div className="space-y-2">
@@ -394,7 +394,12 @@ const PaymentHistoryPage = () => {
               <TabsTrigger value="payment">Payment</TabsTrigger>
               <TabsTrigger value="expense">Expense</TabsTrigger>
             </TabsList>
-            <Button variant="outline" size="sm" onClick={handlePrintPaymentHistory} className="gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrintPaymentHistory}
+              className="gap-2 shrink-0"
+            >
               <FileDown className="h-4 w-4" />
               Print / Save as PDF
             </Button>

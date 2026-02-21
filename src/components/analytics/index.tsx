@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useStore } from '@/stores/store';
 import { useAnalyticsOverview } from '@/services/base/analytics/useAnalytics';
 import { SummaryCards } from './summary-cards';
@@ -12,16 +12,49 @@ import { FarmerSummaryTable } from './farmer-summary-table';
 import { CommodityBreakdown } from './commodity-breakdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { AlertCircle, RefreshCw, Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { CommoditySummary } from '@/types/analytics';
 
+function toDateTimeISO(dateOnly: string, endOfDay: boolean): string {
+  if (!dateOnly) return '';
+  return endOfDay ? `${dateOnly}T23:59:59.999Z` : `${dateOnly}T00:00:00.000Z`;
+}
+
 export default function AnalyticsPage() {
   const { coldStorage } = useStore();
-  const { data, isLoading, isError, error, refetch, isFetching } = useAnalyticsOverview({
-    coldStorageId: coldStorage?.id || '',
-  });
+  const [dateFromInput, setDateFromInput] = useState('');
+  const [dateToInput, setDateToInput] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  const analyticsParams = useMemo(
+    () => ({
+      coldStorageId: coldStorage?.id || '',
+      ...(dateFrom && { dateFrom: toDateTimeISO(dateFrom, false) }),
+      ...(dateTo && { dateTo: toDateTimeISO(dateTo, true) }),
+    }),
+    [coldStorage?.id, dateFrom, dateTo]
+  );
+
+  const { data, isLoading, isError, error, refetch, isFetching } = useAnalyticsOverview(
+    coldStorage?.id ? analyticsParams : undefined
+  );
+
+  const applyDateRange = useCallback(() => {
+    setDateFrom(dateFromInput);
+    setDateTo(dateToInput);
+  }, [dateFromInput, dateToInput]);
+
+  const clearDateRange = useCallback(() => {
+    setDateFromInput('');
+    setDateToInput('');
+    setDateFrom('');
+    setDateTo('');
+  }, []);
 
   // Get available commodities
   const commodities = useMemo(() => {
@@ -298,6 +331,66 @@ export default function AnalyticsPage() {
           <span className="hidden sm:inline">Refresh</span>
         </Button>
       </div>
+
+      {/* Date range filter */}
+      <Card>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-sm font-medium text-muted-foreground">Show by date range</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-0">
+              <div className="space-y-2">
+                <Label htmlFor="analytics-date-from" className="text-sm font-medium">
+                  Date from
+                </Label>
+                <Input
+                  id="analytics-date-from"
+                  type="date"
+                  value={dateFromInput}
+                  onChange={(e) => setDateFromInput(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="analytics-date-to" className="text-sm font-medium">
+                  Date to
+                </Label>
+                <Input
+                  id="analytics-date-to"
+                  type="date"
+                  value={dateToInput}
+                  onChange={(e) => setDateToInput(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="flex items-end gap-2 flex-wrap">
+                <Button
+                  type="button"
+                  variant="default"
+                  size="default"
+                  className="h-10 px-4 gap-2"
+                  onClick={applyDateRange}
+                >
+                  <Filter className="h-4 w-4" />
+                  Apply
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="default"
+                  className="h-10 px-4 gap-2"
+                  onClick={clearDateRange}
+                >
+                  <X className="h-4 w-4" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Commodity Tabs */}
       {commodities.length > 0 && (
