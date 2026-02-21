@@ -5,6 +5,8 @@ export interface DaybookQueryParams {
   sortBy?: 'latest' | 'oldest';
   page?: number;
   limit?: number;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 // Stable query key factory

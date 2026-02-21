@@ -1,5 +1,10 @@
 export interface AnalyticsQueryParams {
   coldStorageId: string;
+  dateFrom?: string;
+  dateTo?: string;
+  commodity?: string;
+  farmerId?: string;
+  locationId?: string;
 }
 
 export interface VarietyAnalysisQueryParams {

@@ -9,7 +9,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { User, Package, Truck, IndianRupee, FileDown, Printer, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  User,
+  Package,
+  Truck,
+  IndianRupee,
+  FileDown,
+  Printer,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import type { FarmerSummaryRow } from '@/types/analytics';
 import { wrapPrintDocument, escapeHtml } from '@/lib/print-layout';
 
@@ -34,7 +43,9 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
   const exportCsv = useCallback(() => {
     const rows: string[] = [];
     rows.push(
-      ['#', 'Farmer Name', 'Total Incoming', 'Total Outgoing', 'Rent Paid', 'Rent Due'].map(escapeCsvCell).join(',')
+      ['#', 'Farmer Name', 'Total Incoming', 'Total Outgoing', 'Rent Paid', 'Rent Due']
+        .map(escapeCsvCell)
+        .join(',')
     );
     data.forEach((row, idx) => {
       rows.push(
@@ -45,23 +56,37 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
           row.totalOutgoingOrders,
           row.rentPaid,
           row.rentDue,
-        ].map(escapeCsvCell).join(',')
+        ]
+          .map(escapeCsvCell)
+          .join(',')
       );
     });
     rows.push('');
     rows.push('Incoming breakdown (Variety, Bag size, Quantity)');
-    rows.push(['Farmer Name', 'Commodity', 'Variety', 'Bag Size', 'Quantity'].map(escapeCsvCell).join(','));
+    rows.push(
+      ['Farmer Name', 'Commodity', 'Variety', 'Bag Size', 'Quantity'].map(escapeCsvCell).join(',')
+    );
     data.forEach((row) => {
       (row.incomingBreakdown ?? []).forEach((b) => {
-        rows.push([row.farmerName, b.commodity, b.variety, b.bagSize, b.quantity].map(escapeCsvCell).join(','));
+        rows.push(
+          [row.farmerName, b.commodity, b.variety, b.bagSize, b.quantity]
+            .map(escapeCsvCell)
+            .join(',')
+        );
       });
     });
     rows.push('');
     rows.push('Outgoing breakdown (Variety, Bag size, Quantity)');
-    rows.push(['Farmer Name', 'Commodity', 'Variety', 'Bag Size', 'Quantity'].map(escapeCsvCell).join(','));
+    rows.push(
+      ['Farmer Name', 'Commodity', 'Variety', 'Bag Size', 'Quantity'].map(escapeCsvCell).join(',')
+    );
     data.forEach((row) => {
       (row.outgoingBreakdown ?? []).forEach((b) => {
-        rows.push([row.farmerName, b.commodity, b.variety, b.bagSize, b.quantity].map(escapeCsvCell).join(','));
+        rows.push(
+          [row.farmerName, b.commodity, b.variety, b.bagSize, b.quantity]
+            .map(escapeCsvCell)
+            .join(',')
+        );
       });
     });
     const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -141,7 +166,8 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
           <div>
             <CardTitle className="text-base sm:text-xl">Farmer Summary</CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              Incoming/outgoing orders and rent (paid vs due) per farmer. Variety and bag size breakdown below.
+              Incoming/outgoing orders and rent (paid vs due) per farmer. Variety and bag size
+              breakdown below.
             </CardDescription>
           </div>
           <div className="flex gap-2">
@@ -180,17 +206,23 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                   <div className="flex items-center gap-1.5">
                     <IndianRupee className="h-3.5 w-3 text-green-600" />
                     <span className="text-muted-foreground">Rent paid:</span>
-                    <span className="text-green-600 font-medium">{formatCurrency(row.rentPaid)}</span>
+                    <span className="text-green-600 font-medium">
+                      {formatCurrency(row.rentPaid)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <IndianRupee className="h-3.5 w-3 text-destructive" />
                     <span className="text-muted-foreground">Rent due:</span>
-                    <span className="text-destructive font-medium">{formatCurrency(row.rentDue)}</span>
+                    <span className="text-destructive font-medium">
+                      {formatCurrency(row.rentDue)}
+                    </span>
                   </div>
                 </div>
                 {(row.incomingBreakdown?.length ?? 0) > 0 && (
                   <div className="pt-2 border-t text-xs">
-                    <p className="font-medium text-muted-foreground mb-1">Incoming (variety, size, qty)</p>
+                    <p className="font-medium text-muted-foreground mb-1">
+                      Incoming (variety, size, qty)
+                    </p>
                     {(row.incomingBreakdown ?? []).map((b, i) => (
                       <div key={i} className="flex gap-2">
                         <span>{b.variety}</span>
@@ -202,7 +234,9 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                 )}
                 {(row.outgoingBreakdown?.length ?? 0) > 0 && (
                   <div className="pt-2 border-t text-xs">
-                    <p className="font-medium text-muted-foreground mb-1">Outgoing (variety, size, qty)</p>
+                    <p className="font-medium text-muted-foreground mb-1">
+                      Outgoing (variety, size, qty)
+                    </p>
                     {(row.outgoingBreakdown ?? []).map((b, i) => (
                       <div key={i} className="flex gap-2">
                         <span>{b.variety}</span>
@@ -217,8 +251,8 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
           ))}
         </div>
 
-        {/* Desktop table with expandable breakdown */}
-        <div className="hidden sm:block overflow-x-auto rounded-md border">
+        {/* Desktop table with expandable breakdown (shadcn Card layout) */}
+        <div className="hidden sm:block overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -237,99 +271,170 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((row, idx) => (
-                <React.Fragment key={row.farmerStorageLinkId}>
-                  <TableRow
-                    key={row.farmerStorageLinkId}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() =>
-                      setExpandedId((id) => (id === row.farmerStorageLinkId ? null : row.farmerStorageLinkId))
-                    }
-                  >
-                    <TableCell className="w-10">
-                      {(row.incomingBreakdown?.length ?? 0) > 0 || (row.outgoingBreakdown?.length ?? 0) > 0 ? (
-                        expandedId === row.farmerStorageLinkId ? (
-                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              {data.map((row, idx) => {
+                const hasBreakdown =
+                  (row.incomingBreakdown?.length ?? 0) > 0 ||
+                  (row.outgoingBreakdown?.length ?? 0) > 0;
+                const isExpanded = expandedId === row.farmerStorageLinkId;
+                return (
+                  <React.Fragment key={row.farmerStorageLinkId}>
+                    <TableRow
+                      className={hasBreakdown ? 'cursor-pointer hover:bg-muted/50' : ''}
+                      onClick={() =>
+                        hasBreakdown &&
+                        setExpandedId((id) =>
+                          id === row.farmerStorageLinkId ? null : row.farmerStorageLinkId
                         )
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground font-medium">{idx + 1}</TableCell>
-                    <TableCell className="font-medium">{row.farmerName}</TableCell>
-                    <TableCell className="text-right">{row.totalIncomingOrders}</TableCell>
-                    <TableCell className="text-right">{row.totalOutgoingOrders}</TableCell>
-                    <TableCell className="text-right text-green-600 font-medium">
-                      {formatCurrency(row.rentPaid)}
-                    </TableCell>
-                    <TableCell className="text-right text-destructive font-medium">
-                      {formatCurrency(row.rentDue)}
-                    </TableCell>
-                  </TableRow>
-                  {expandedId === row.farmerStorageLinkId && (
-                    <TableRow key={`${row.farmerStorageLinkId}-detail`}>
-                      <TableCell colSpan={7} className="bg-muted/30 p-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          <div>
-                            <h4 className="font-semibold text-sm mb-2">Incoming (variety, bag size, quantity)</h4>
-                            {(row.incomingBreakdown?.length ?? 0) > 0 ? (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Commodity</TableHead>
-                                    <TableHead>Variety</TableHead>
-                                    <TableHead>Bag size</TableHead>
-                                    <TableHead className="text-right">Qty</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {(row.incomingBreakdown ?? []).map((b, i) => (
-                                    <TableRow key={i}>
-                                      <TableCell>{b.commodity}</TableCell>
-                                      <TableCell>{b.variety}</TableCell>
-                                      <TableCell>{b.bagSize}</TableCell>
-                                      <TableCell className="text-right">{b.quantity}</TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                      }
+                    >
+                      <TableCell className="w-10 align-middle">
+                        {hasBreakdown ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 -ml-1 rounded-md pointer-events-none"
+                            aria-hidden
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
                             ) : (
-                              <p className="text-sm text-muted-foreground">No incoming breakdown</p>
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
                             )}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-sm mb-2">Outgoing (variety, bag size, quantity)</h4>
-                            {(row.outgoingBreakdown?.length ?? 0) > 0 ? (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Commodity</TableHead>
-                                    <TableHead>Variety</TableHead>
-                                    <TableHead>Bag size</TableHead>
-                                    <TableHead className="text-right">Qty</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {(row.outgoingBreakdown ?? []).map((b, i) => (
-                                    <TableRow key={i}>
-                                      <TableCell>{b.commodity}</TableCell>
-                                      <TableCell>{b.variety}</TableCell>
-                                      <TableCell>{b.bagSize}</TableCell>
-                                      <TableCell className="text-right">{b.quantity}</TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">No outgoing breakdown</p>
-                            )}
-                          </div>
-                        </div>
+                          </Button>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground font-medium align-middle">
+                        {idx + 1}
+                      </TableCell>
+                      <TableCell className="font-medium align-middle">{row.farmerName}</TableCell>
+                      <TableCell className="text-right align-middle">
+                        {row.totalIncomingOrders}
+                      </TableCell>
+                      <TableCell className="text-right align-middle">
+                        {row.totalOutgoingOrders}
+                      </TableCell>
+                      <TableCell className="text-right text-green-600 font-medium align-middle">
+                        {formatCurrency(row.rentPaid)}
+                      </TableCell>
+                      <TableCell className="text-right text-destructive font-medium align-middle">
+                        {formatCurrency(row.rentDue)}
                       </TableCell>
                     </TableRow>
-                  )}
-                </React.Fragment>
-              ))}
+                    {isExpanded && (
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={7} className="p-0 border-b border-border/50">
+                          <div className="bg-muted/20 px-4 py-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                              <Card className="overflow-hidden border shadow-none bg-background/80">
+                                <CardHeader className="py-3 px-4">
+                                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                    Incoming
+                                  </CardTitle>
+                                  <CardDescription className="text-xs">
+                                    Variety, bag size, quantity
+                                  </CardDescription>
+                                </CardHeader>
+                                <CardContent className="px-4 pb-4 pt-0">
+                                  {(row.incomingBreakdown?.length ?? 0) > 0 ? (
+                                    <div className="rounded-md border">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead className="text-xs">Commodity</TableHead>
+                                            <TableHead className="text-xs">Variety</TableHead>
+                                            <TableHead className="text-xs">Bag size</TableHead>
+                                            <TableHead className="text-right text-xs">
+                                              Qty
+                                            </TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {(row.incomingBreakdown ?? []).map((b, i) => (
+                                            <TableRow key={i}>
+                                              <TableCell className="text-xs py-2">
+                                                {b.commodity}
+                                              </TableCell>
+                                              <TableCell className="text-xs py-2">
+                                                {b.variety}
+                                              </TableCell>
+                                              <TableCell className="text-xs py-2">
+                                                {b.bagSize}
+                                              </TableCell>
+                                              <TableCell className="text-right text-xs py-2 font-medium">
+                                                {b.quantity}
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground py-2">
+                                      No incoming breakdown
+                                    </p>
+                                  )}
+                                </CardContent>
+                              </Card>
+                              <Card className="overflow-hidden border shadow-none bg-background/80">
+                                <CardHeader className="py-3 px-4">
+                                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                    <Truck className="h-4 w-4 text-muted-foreground" />
+                                    Outgoing
+                                  </CardTitle>
+                                  <CardDescription className="text-xs">
+                                    Variety, bag size, quantity
+                                  </CardDescription>
+                                </CardHeader>
+                                <CardContent className="px-4 pb-4 pt-0">
+                                  {(row.outgoingBreakdown?.length ?? 0) > 0 ? (
+                                    <div className="rounded-md border">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead className="text-xs">Commodity</TableHead>
+                                            <TableHead className="text-xs">Variety</TableHead>
+                                            <TableHead className="text-xs">Bag size</TableHead>
+                                            <TableHead className="text-right text-xs">
+                                              Qty
+                                            </TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {(row.outgoingBreakdown ?? []).map((b, i) => (
+                                            <TableRow key={i}>
+                                              <TableCell className="text-xs py-2">
+                                                {b.commodity}
+                                              </TableCell>
+                                              <TableCell className="text-xs py-2">
+                                                {b.variety}
+                                              </TableCell>
+                                              <TableCell className="text-xs py-2">
+                                                {b.bagSize}
+                                              </TableCell>
+                                              <TableCell className="text-right text-xs py-2 font-medium">
+                                                {b.quantity}
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground py-2">
+                                      No outgoing breakdown
+                                    </p>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -337,4 +442,3 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
     </Card>
   );
 }
-

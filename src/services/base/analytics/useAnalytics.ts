@@ -28,6 +28,11 @@ const fetchAnalyticsOverview = async (
     {
       params: {
         coldStorageId: params.coldStorageId,
+        ...(params.dateFrom && { dateFrom: params.dateFrom }),
+        ...(params.dateTo && { dateTo: params.dateTo }),
+        ...(params.commodity && { commodity: params.commodity }),
+        ...(params.farmerId && { farmerId: params.farmerId }),
+        ...(params.locationId && { locationId: params.locationId }),
       },
       signal,
     }
