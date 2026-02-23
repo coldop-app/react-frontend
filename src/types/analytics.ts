@@ -12,6 +12,8 @@ export interface FarmerSummaryBreakdownItem {
   variety: string;
   bagSize: string;
   quantity: number;
+  /** Remaining quantity (incoming - outgoing for same key); only for incoming when provided by API */
+  remainingQuantity?: number;
 }
 
 /**

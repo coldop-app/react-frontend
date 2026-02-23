@@ -40,10 +40,23 @@ function escapeCsvCell(val: string | number): string {
 export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const totalIncomingQty = (row: FarmerSummaryRow) =>
+    (row.incomingBreakdown ?? []).reduce((s, b) => s + b.quantity, 0);
+  const totalOutgoingQty = (row: FarmerSummaryRow) =>
+    (row.outgoingBreakdown ?? []).reduce((s, b) => s + b.quantity, 0);
+  const outgoingQtyByKey = (row: FarmerSummaryRow) => {
+    const map = new Map<string, number>();
+    (row.outgoingBreakdown ?? []).forEach((b) => {
+      const key = `${b.commodity}|${b.variety}|${b.bagSize}`;
+      map.set(key, (map.get(key) ?? 0) + b.quantity);
+    });
+    return map;
+  };
+
   const exportCsv = useCallback(() => {
     const rows: string[] = [];
     rows.push(
-      ['#', 'Farmer Name', 'Total Incoming', 'Total Outgoing', 'Rent Paid', 'Rent Due']
+      ['#', 'Farmer Name', 'Total Incoming (qty)', 'Total Outgoing (qty)', 'Rent Paid', 'Rent Due']
         .map(escapeCsvCell)
         .join(',')
     );
@@ -52,8 +65,8 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
         [
           idx + 1,
           row.farmerName,
-          row.totalIncomingOrders,
-          row.totalOutgoingOrders,
+          totalIncomingQty(row),
+          totalOutgoingQty(row),
           row.rentPaid,
           row.rentDue,
         ]
@@ -99,28 +112,34 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
   }, [data]);
 
   const handlePrint = useCallback(() => {
-    const incomingRows = data.flatMap((row) =>
-      (row.incomingBreakdown ?? []).map(
-        (b) =>
-          `<tr><td>${escapeHtml(row.farmerName)}</td><td>Incoming</td><td>${escapeHtml(b.commodity)}</td><td>${escapeHtml(b.variety)}</td><td>${escapeHtml(b.bagSize)}</td><td class="num">${b.quantity}</td></tr>`
-      )
-    );
+    const incomingRows = data.flatMap((row) => {
+      const outByKey = new Map<string, number>();
+      (row.outgoingBreakdown ?? []).forEach((b) => {
+        const key = `${b.commodity}|${b.variety}|${b.bagSize}`;
+        outByKey.set(key, (outByKey.get(key) ?? 0) + b.quantity);
+      });
+      return (row.incomingBreakdown ?? []).map((b) => {
+        const key = `${b.commodity}|${b.variety}|${b.bagSize}`;
+        const remaining = Math.max(0, b.quantity - (outByKey.get(key) ?? 0));
+        return `<tr><td>${escapeHtml(row.farmerName)}</td><td>Incoming</td><td>${escapeHtml(b.commodity)}</td><td>${escapeHtml(b.variety)}</td><td>${escapeHtml(b.bagSize)}</td><td class="num">${b.quantity}</td><td class="num">${remaining}</td></tr>`;
+      });
+    });
     const outgoingRows = data.flatMap((row) =>
       (row.outgoingBreakdown ?? []).map(
         (b) =>
-          `<tr><td>${escapeHtml(row.farmerName)}</td><td>Outgoing</td><td>${escapeHtml(b.commodity)}</td><td>${escapeHtml(b.variety)}</td><td>${escapeHtml(b.bagSize)}</td><td class="num">${b.quantity}</td></tr>`
+          `<tr><td>${escapeHtml(row.farmerName)}</td><td>Outgoing</td><td>${escapeHtml(b.commodity)}</td><td>${escapeHtml(b.variety)}</td><td>${escapeHtml(b.bagSize)}</td><td class="num">${b.quantity}</td><td class="num">—</td></tr>`
       )
     );
     const bodyHtml = `
       <div class="print-section">
         <h3>Summary</h3>
         <table class="print-table">
-          <thead><tr><th>#</th><th>Farmer name</th><th class="num">Total incoming</th><th class="num">Total outgoing</th><th class="num">Rent paid</th><th class="num">Rent due</th></tr></thead>
+          <thead><tr><th>#</th><th>Farmer name</th><th class="num">Total incoming (qty)</th><th class="num">Total outgoing (qty)</th><th class="num">Rent paid</th><th class="num">Rent due</th></tr></thead>
           <tbody>
             ${data
               .map(
                 (row, idx) =>
-                  `<tr><td>${idx + 1}</td><td>${escapeHtml(row.farmerName)}</td><td class="num">${row.totalIncomingOrders}</td><td class="num">${row.totalOutgoingOrders}</td><td class="num">${formatCurrency(row.rentPaid)}</td><td class="num">${formatCurrency(row.rentDue)}</td></tr>`
+                  `<tr><td>${idx + 1}</td><td>${escapeHtml(row.farmerName)}</td><td class="num">${(row.incomingBreakdown ?? []).reduce((s, b) => s + b.quantity, 0)}</td><td class="num">${(row.outgoingBreakdown ?? []).reduce((s, b) => s + b.quantity, 0)}</td><td class="num">${formatCurrency(row.rentPaid)}</td><td class="num">${formatCurrency(row.rentDue)}</td></tr>`
               )
               .join('')}
           </tbody>
@@ -129,15 +148,15 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
       <div class="print-section">
         <h3>Incoming (variety & bag size)</h3>
         <table class="print-table">
-          <thead><tr><th>Farmer</th><th>Type</th><th>Commodity</th><th>Variety</th><th>Bag size</th><th class="num">Quantity</th></tr></thead>
-          <tbody>${incomingRows.length ? incomingRows.join('') : '<tr><td colspan="6">No data</td></tr>'}</tbody>
+          <thead><tr><th>Farmer</th><th>Type</th><th>Commodity</th><th>Variety</th><th>Bag size</th><th class="num">Quantity</th><th class="num">Remaining</th></tr></thead>
+          <tbody>${incomingRows.length ? incomingRows.join('') : '<tr><td colspan="7">No data</td></tr>'}</tbody>
         </table>
       </div>
       <div class="print-section">
         <h3>Outgoing (variety & bag size)</h3>
         <table class="print-table">
-          <thead><tr><th>Farmer</th><th>Type</th><th>Commodity</th><th>Variety</th><th>Bag size</th><th class="num">Quantity</th></tr></thead>
-          <tbody>${outgoingRows.length ? outgoingRows.join('') : '<tr><td colspan="6">No data</td></tr>'}</tbody>
+          <thead><tr><th>Farmer</th><th>Type</th><th>Commodity</th><th>Variety</th><th>Bag size</th><th class="num">Quantity</th><th class="num">Remaining</th></tr></thead>
+          <tbody>${outgoingRows.length ? outgoingRows.join('') : '<tr><td colspan="7">No data</td></tr>'}</tbody>
         </table>
       </div>
     `;
@@ -195,13 +214,13 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5">
                     <Package className="h-3.5 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">Incoming:</span>
-                    <span>{row.totalIncomingOrders}</span>
+                    <span className="text-muted-foreground">Incoming (qty):</span>
+                    <span>{totalIncomingQty(row)}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Truck className="h-3.5 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">Outgoing:</span>
-                    <span>{row.totalOutgoingOrders}</span>
+                    <span className="text-muted-foreground">Outgoing (qty):</span>
+                    <span>{totalOutgoingQty(row)}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <IndianRupee className="h-3.5 w-3 text-green-600" />
@@ -221,15 +240,21 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                 {(row.incomingBreakdown?.length ?? 0) > 0 && (
                   <div className="pt-2 border-t text-xs">
                     <p className="font-medium text-muted-foreground mb-1">
-                      Incoming (variety, size, qty)
+                      Incoming (variety, size, qty, remaining)
                     </p>
-                    {(row.incomingBreakdown ?? []).map((b, i) => (
-                      <div key={i} className="flex gap-2">
-                        <span>{b.variety}</span>
-                        <span>{b.bagSize}</span>
-                        <span>{b.quantity}</span>
-                      </div>
-                    ))}
+                    {(row.incomingBreakdown ?? []).map((b, i) => {
+                      const outByKey = outgoingQtyByKey(row);
+                      const key = `${b.commodity}|${b.variety}|${b.bagSize}`;
+                      const remaining = Math.max(0, b.quantity - (outByKey.get(key) ?? 0));
+                      return (
+                        <div key={i} className="flex gap-2 flex-wrap">
+                          <span>{b.variety}</span>
+                          <span>{b.bagSize}</span>
+                          <span>qty: {b.quantity}</span>
+                          <span className="text-muted-foreground">rem: {remaining}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 {(row.outgoingBreakdown?.length ?? 0) > 0 && (
@@ -264,8 +289,8 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                     Farmer name
                   </span>
                 </TableHead>
-                <TableHead className="text-right">Total incoming</TableHead>
-                <TableHead className="text-right">Total outgoing</TableHead>
+                <TableHead className="text-right">Total incoming (qty)</TableHead>
+                <TableHead className="text-right">Total outgoing (qty)</TableHead>
                 <TableHead className="text-right">Rent paid</TableHead>
                 <TableHead className="text-right">Rent due</TableHead>
               </TableRow>
@@ -308,10 +333,10 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                       </TableCell>
                       <TableCell className="font-medium align-middle">{row.farmerName}</TableCell>
                       <TableCell className="text-right align-middle">
-                        {row.totalIncomingOrders}
+                        {totalIncomingQty(row)}
                       </TableCell>
                       <TableCell className="text-right align-middle">
-                        {row.totalOutgoingOrders}
+                        {totalOutgoingQty(row)}
                       </TableCell>
                       <TableCell className="text-right text-green-600 font-medium align-middle">
                         {formatCurrency(row.rentPaid)}
@@ -337,38 +362,54 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                                 </CardHeader>
                                 <CardContent className="px-4 pb-4 pt-0">
                                   {(row.incomingBreakdown?.length ?? 0) > 0 ? (
-                                    <div className="rounded-md border">
-                                      <Table>
-                                        <TableHeader>
-                                          <TableRow>
-                                            <TableHead className="text-xs">Commodity</TableHead>
-                                            <TableHead className="text-xs">Variety</TableHead>
-                                            <TableHead className="text-xs">Bag size</TableHead>
-                                            <TableHead className="text-right text-xs">
-                                              Qty
-                                            </TableHead>
-                                          </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                          {(row.incomingBreakdown ?? []).map((b, i) => (
-                                            <TableRow key={i}>
-                                              <TableCell className="text-xs py-2">
-                                                {b.commodity}
-                                              </TableCell>
-                                              <TableCell className="text-xs py-2">
-                                                {b.variety}
-                                              </TableCell>
-                                              <TableCell className="text-xs py-2">
-                                                {b.bagSize}
-                                              </TableCell>
-                                              <TableCell className="text-right text-xs py-2 font-medium">
-                                                {b.quantity}
-                                              </TableCell>
-                                            </TableRow>
-                                          ))}
-                                        </TableBody>
-                                      </Table>
-                                    </div>
+                                    (() => {
+                                      const outByKey = outgoingQtyByKey(row);
+                                      return (
+                                        <div className="rounded-md border">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow>
+                                                <TableHead className="text-xs">Commodity</TableHead>
+                                                <TableHead className="text-xs">Variety</TableHead>
+                                                <TableHead className="text-xs">Bag size</TableHead>
+                                                <TableHead className="text-right text-xs">
+                                                  Qty
+                                                </TableHead>
+                                                <TableHead className="text-right text-xs">
+                                                  Remaining
+                                                </TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {(row.incomingBreakdown ?? []).map((b, i) => {
+                                                const key = `${b.commodity}|${b.variety}|${b.bagSize}`;
+                                                const outQty = outByKey.get(key) ?? 0;
+                                                const remaining = Math.max(0, b.quantity - outQty);
+                                                return (
+                                                  <TableRow key={i}>
+                                                    <TableCell className="text-xs py-2">
+                                                      {b.commodity}
+                                                    </TableCell>
+                                                    <TableCell className="text-xs py-2">
+                                                      {b.variety}
+                                                    </TableCell>
+                                                    <TableCell className="text-xs py-2">
+                                                      {b.bagSize}
+                                                    </TableCell>
+                                                    <TableCell className="text-right text-xs py-2 font-medium">
+                                                      {b.quantity}
+                                                    </TableCell>
+                                                    <TableCell className="text-right text-xs py-2 text-muted-foreground">
+                                                      {remaining}
+                                                    </TableCell>
+                                                  </TableRow>
+                                                );
+                                              })}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                      );
+                                    })()
                                   ) : (
                                     <p className="text-xs text-muted-foreground py-2">
                                       No incoming breakdown
@@ -398,6 +439,9 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                                             <TableHead className="text-right text-xs">
                                               Qty
                                             </TableHead>
+                                            <TableHead className="text-right text-xs">
+                                              Remaining
+                                            </TableHead>
                                           </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -414,6 +458,9 @@ export function FarmerSummaryTable({ data }: { data: FarmerSummaryRow[] }) {
                                               </TableCell>
                                               <TableCell className="text-right text-xs py-2 font-medium">
                                                 {b.quantity}
+                                              </TableCell>
+                                              <TableCell className="text-right text-xs py-2 text-muted-foreground">
+                                                —
                                               </TableCell>
                                             </TableRow>
                                           ))}
