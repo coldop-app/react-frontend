@@ -8,13 +8,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, MapPin, User } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, MapPin, User, Filter } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import type { LocationAnalytics } from '@/types/analytics';
 
 export function LocationAnalyticsTable({ data }: { data: LocationAnalytics[] }) {
   const [expandedLocations, setExpandedLocations] = useState<string[]>([]);
+  const [filterFloor, setFilterFloor] = useState('');
+  const [filterRow, setFilterRow] = useState('');
+  const [filterChamber, setFilterChamber] = useState('');
 
   const toggleLocation = (locationId: string) => {
     setExpandedLocations((prev) =>
@@ -22,8 +27,24 @@ export function LocationAnalyticsTable({ data }: { data: LocationAnalytics[] }) 
     );
   };
 
-  // Sort by total bags descending
-  const sortedLocations = [...data].sort((a, b) => b.totalCurrentBags - a.totalCurrentBags);
+  const filteredAndSortedLocations = useMemo(() => {
+    let list = data;
+    if (filterFloor.trim()) {
+      const q = filterFloor.trim().toLowerCase();
+      list = list.filter((loc) => loc.floor.toLowerCase().includes(q));
+    }
+    if (filterRow.trim()) {
+      const q = filterRow.trim().toLowerCase();
+      list = list.filter((loc) => loc.row.toLowerCase().includes(q));
+    }
+    if (filterChamber.trim()) {
+      const q = filterChamber.trim().toLowerCase();
+      list = list.filter((loc) => loc.chamber.toLowerCase().includes(q));
+    }
+    return [...list].sort((a, b) => b.totalCurrentBags - a.totalCurrentBags);
+  }, [data, filterFloor, filterRow, filterChamber]);
+
+  const sortedLocations = filteredAndSortedLocations;
 
   return (
     <Card>
@@ -33,9 +54,58 @@ export function LocationAnalyticsTable({ data }: { data: LocationAnalytics[] }) 
           Detailed breakdown of stock by storage location and farmer
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-0 sm:px-6">
+      <CardContent className="px-4 sm:px-6 space-y-4">
+        {/* Filters: Floor, Row, Chamber */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium text-muted-foreground">Filter by location</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="loc-filter-floor" className="text-xs font-medium">
+                Floor
+              </Label>
+              <Input
+                id="loc-filter-floor"
+                type="text"
+                placeholder="Any"
+                value={filterFloor}
+                onChange={(e) => setFilterFloor(e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="loc-filter-row" className="text-xs font-medium">
+                Row
+              </Label>
+              <Input
+                id="loc-filter-row"
+                type="text"
+                placeholder="Any"
+                value={filterRow}
+                onChange={(e) => setFilterRow(e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="loc-filter-chamber" className="text-xs font-medium">
+                Chamber
+              </Label>
+              <Input
+                id="loc-filter-chamber"
+                type="text"
+                placeholder="Any"
+                value={filterChamber}
+                onChange={(e) => setFilterChamber(e.target.value)}
+                className="h-9"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Mobile Card View */}
-        <div className="sm:hidden space-y-3 px-4">
+        <div className="sm:hidden space-y-3">
           {sortedLocations.map((location) => (
             <Collapsible
               key={location.locationId}
